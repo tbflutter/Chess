@@ -59,9 +59,6 @@ class ChessBoard {
           if(pos[0] >= 0){ // 왼쪽 대각선 잡기
             if(boardState[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1].pieceType != PieceType.X) {
               tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1] = MoveType.n;
-            }git 
-            if(enpassFile == pos[0] - 1 && pos[0] == (lastPlayer == Player.w ? 4 : 5)){ // 앙파상 왼쪽
-              tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1] = MoveType.ep;
             }
             if(enpassFile == pos[0] - 1 && pos[0] == (lastPlayer == Player.w ? 4 : 5)){ // 앙파상 왼쪽
               tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1] = MoveType.ep;
