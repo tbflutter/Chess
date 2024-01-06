@@ -1,4 +1,4 @@
-enum Pieces {
+enum Pieces { // 기물 목록
   nX(Player.n, PieceType.X),
   wP(Player.w, PieceType.P), wN(Player.w, PieceType.N), wB(Player.w, PieceType.B),
   wR(Player.w, PieceType.R), wQ(Player.w, PieceType.Q), wK(Player.w, PieceType.K),
@@ -9,13 +9,13 @@ enum Pieces {
   final PieceType pieceType;
   const Pieces(this.controller, this.pieceType);
 }
-enum Player {
+enum Player { // 흰색, 검은색, 중립
   w, b, n
 }
-enum PieceType {
+enum PieceType { // 없음, 폰, 나이트, 비숍, 룩, 퀸, 킹
   X, P, N, B, R, Q, K
 }
-enum MoveType {
+enum MoveType { // 이동불가, 일반이동, 캐슬링 이동, 폰 초기 2칸 전진, 폰 이동 후 프로모션, 앙파상
   x, n, ca, p2, pm, ep
 }
 
@@ -49,26 +49,26 @@ class ChessBoard {
       switch(boardState[pos[1]][pos[0]].pieceType){ //TODO: 이동시 체크 확인
         case PieceType.P: // 폰일 경우
           if(boardState[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0]].pieceType == PieceType.X) { // 첫 전진
-            tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0]] = (pos[1] == (lastPlayer == Player.w ? 1 : 7)) ? MoveType.pm : MoveType.n;
-            if(pos[1] == (lastPlayer == Player.w ? 6 : 1)){ // 2번째 전진
+            tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0]] = (pos[1] == (lastPlayer == Player.w ? 1 : boardSize[1] - 1)) ? MoveType.pm : MoveType.n;
+            if(pos[1] == (lastPlayer == Player.w ? boardSize[1] - 2 : 1)){ // 2번째 전진
               if(boardState[pos[1] + (lastPlayer == Player.w ? -2 : 2)][pos[0]].pieceType == PieceType.X) {
                 tempMove[pos[1] + (lastPlayer == Player.w ? -2 : 2)][pos[0]] = MoveType.p2;
               }
             }
           }
-          if(pos[0] >= 0){ // 왼쪽 대각선 잡기
+          if(pos[0] - 1 >= 0){ // 왼쪽 대각선 잡기
             if(boardState[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1].pieceType != PieceType.X) {
-              tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1] = MoveType.n;
+              tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1] = (pos[1] == (lastPlayer == Player.w ? 1 : boardSize[1] - 1)) ? MoveType.pm : MoveType.n;
             }
-            if(enpassFile == pos[0] - 1 && pos[0] == (lastPlayer == Player.w ? 4 : 5)){ // 앙파상 왼쪽
+            if(enpassFile == pos[0] - 1 && pos[0] == (lastPlayer == Player.w ? 3 : boardSize[1] - 4)){ // 앙파상 왼쪽
               tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] - 1] = MoveType.ep;
             }
           }
-          if(pos[0] < boardSize[0]){ // 오른쪽 대각선 잡기
+          if(pos[0] + 1 < boardSize[0]){ // 오른쪽 대각선 잡기
             if(boardState[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] + 1].pieceType != PieceType.X) {
-              tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] + 1] = MoveType.n;
+              tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] + 1] = (pos[1] == (lastPlayer == Player.w ? 1 : boardSize[1] - 1)) ? MoveType.pm : MoveType.n;
             }
-            if(enpassFile == pos[0] + 1 && pos[0] == (lastPlayer == Player.w ? 4 : 5)){ // 앙파상 오른쪽
+            if(enpassFile == pos[0] + 1 && pos[0] == (lastPlayer == Player.w ? 3 : boardSize[1] - 4)){ // 앙파상 오른쪽
               tempMove[pos[1] + (lastPlayer == Player.w ? -1 : 1)][pos[0] + 1] = MoveType.ep;
             }
           }
@@ -86,38 +86,38 @@ class ChessBoard {
           return tempMove;
 
         case PieceType.B: // 비숍일 경우
-          for(int i = 1; i < 8; i++) { //4방향에 대해 판단
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) { //4방향에 대해 판단
             tempMove[pos[1] - i][pos[0] - i] = MoveType.n;
             if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X || pos[0] - i >= 0 || pos[1] - i >= 0) break;
           }
-          for(int i = 1; i < 8; i++) {
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
             tempMove[pos[1] + i][pos[0] - i] = MoveType.n;
             if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X || pos[0] - i >= 0 || pos[1] - i < boardSize[1]) break;
           }
-          for(int i = 1; i < 8; i++) {
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
             tempMove[pos[1] - i][pos[0] + i] = MoveType.n;
             if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X || pos[0] + i < boardSize[0] || pos[1] - i >= 0) break;
           }
-          for(int i = 1; i < 8; i++) {
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
             tempMove[pos[1] + i][pos[0] + i] = MoveType.n;
             if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X || pos[0] + i < boardSize[0] || pos[1] - i < boardSize[1]) break;
           }
           return tempMove;
 
         case PieceType.R: //룩일 경우
-          for(int i = 1; i < 8; i++) { //4방향에 대해 판단
+          for(int i = 1; i < boardSize[1]; i++) { //4방향에 대해 판단
             tempMove[pos[1] - i][pos[0]] = MoveType.n;
             if(boardState[pos[1] - i][pos[0]].pieceType != PieceType.X || pos[1] - i >= 0) break;
           }
-          for(int i = 1; i < 8; i++) {
+          for(int i = 1; i < boardSize[1]; i++) {
             tempMove[pos[1] + i][pos[0]] = MoveType.n;
             if(boardState[pos[1] + i][pos[0]].pieceType != PieceType.X || pos[1] - i < boardSize[1]) break;
           }
-          for(int i = 1; i < 8; i++) {
+          for(int i = 1; i < boardSize[0]; i++) {
             tempMove[pos[1]][pos[0] - i] = MoveType.n;
             if(boardState[pos[1]][pos[0] - i].pieceType != PieceType.X || pos[0] - i >= 0) break;
           }
-          for(int i = 1; i < 8; i++) {
+          for(int i = 1; i < boardSize[0]; i++) {
             tempMove[pos[1]][pos[0] + i] = MoveType.n;
             if(boardState[pos[1]][pos[0] + i].pieceType != PieceType.X || pos[0] + i < boardSize[0]) break;
           }
@@ -138,18 +138,18 @@ class ChessBoard {
           if(pos[0] + 1 < boardSize[0] && pos[1] + 1 < boardSize[1]) tempMove[pos[1] + 1][pos[0] + 1] = MoveType.n;
 
           if(isCastleAble[lastPlayer == Player.w ? 0 : 2]){ // 킹사이드 캐슬링
-            if(boardState[lastPlayer == Player.w ? 7 : 0][pos[0] + 1].pieceType == PieceType.X
-                || boardState[lastPlayer == Player.w ? 7 : 0][pos[0] + 2].pieceType == PieceType.X
-                || boardState[lastPlayer == Player.w ? 7 : 0][pos[0] + 3].pieceType == PieceType.X){
+            if(boardState[lastPlayer == Player.w ? boardSize[1] - 1 : 0][pos[0] + 1].pieceType == PieceType.X
+                || boardState[lastPlayer == Player.w ? boardSize[1] - 1 : 0][pos[0] + 2].pieceType == PieceType.X
+                || boardState[lastPlayer == Player.w ? boardSize[1] - 1 : 0][pos[0] + 3].pieceType == PieceType.X){
               if(true) { //TODO: 경로와 결과위치 체크인지 확인
                 tempMove[pos[1]][pos[0] + 2] = MoveType.ca;
               }
             }
           }
           if(isCastleAble[lastPlayer == Player.w ? 1 : 3]){ // 퀸사이드 캐슬링
-            if(boardState[lastPlayer == Player.w ? 7 : 0][pos[0] - 1].pieceType == PieceType.X
-                || boardState[lastPlayer == Player.w ? 7 : 0][pos[0] - 2].pieceType == PieceType.X
-                || boardState[lastPlayer == Player.w ? 7 : 0][pos[0] - 3].pieceType == PieceType.X){
+            if(boardState[lastPlayer == Player.w ? boardSize[1] - 1 : 0][pos[0] - 1].pieceType == PieceType.X
+                || boardState[lastPlayer == Player.w ? boardSize[1] - 1 : 0][pos[0] - 2].pieceType == PieceType.X
+                || boardState[lastPlayer == Player.w ? boardSize[1] - 1 : 0][pos[0] - 3].pieceType == PieceType.X){
               if(true) { //TODO: 경로와 결과위치 체크인지 확인
                 tempMove[pos[1]][pos[0] - 2] = MoveType.ca;
               }
