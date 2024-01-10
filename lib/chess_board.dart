@@ -29,6 +29,7 @@ enum CastleType {
 class ChessBoard {
   static final List<int> boardSize = [8,8]; //가로, 세로
   late List<List<Pieces>> boardState; //기물 위치
+  List<List<Pieces>> boardCopy() => List.generate(boardSize[1], (i) => List.from(boardState[i]));//기물 위치의 복사본
   int epFile = -1; // 앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
   int drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수, 75가 되면 무승부
   late Map<CastleType,bool> isCastleAble; // 캐슬링 가능 여부
@@ -78,7 +79,7 @@ class ChessBoard {
       return MoveType.x; // 보드 외부에 이동 시도
     }
 
-    List<List<Pieces>> tempBoardState = boardState;
+    List<List<Pieces>> tempBoardState = boardCopy();
     Pieces startPiece = tempBoardState[posStart[1]][posStart[0]];
     Pieces endPiece = tempBoardState[posEnd[1]][posEnd[0]];
 
@@ -133,13 +134,13 @@ class ChessBoard {
               tempMove[pos[1] + fw()][pos[0] - 1] = findMoveType(pos, [pos[0] - 1, pos[1] + fw()]);
             }
             if(epFile == pos[0] - 1 && pos[0] == epRank){ // 앙파상 왼쪽
-              List<List<Pieces>> tempBoardState = boardState;
+              List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
 
               tempBoardState[pos[1]][pos[0] - 1] = Pieces.nX;
               tempBoardState[pos[1] + fw()][pos[0] - 1] = tempPiece;
               tempBoardState[pos[1]][pos[0]] = Pieces.nX;
-              if(isChecked(tempBoardState)) {
+              if(!isChecked(tempBoardState)) {
                 tempMove[pos[1] + fw()][pos[0] - 1] = MoveType.ep;
               }
             }
@@ -149,13 +150,13 @@ class ChessBoard {
               tempMove[pos[1] + fw()][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1] + fw()]);
             }
             if(epFile == pos[0] + 1 && pos[0] == epRank){ // 앙파상 오른쪽
-              List<List<Pieces>> tempBoardState = boardState;
+              List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
 
               tempBoardState[pos[1]][pos[0] + 1] = Pieces.nX;
               tempBoardState[pos[1] + fw()][pos[0] + 1] = tempPiece;
               tempBoardState[pos[1]][pos[0]] = Pieces.nX;
-              if(isChecked(tempBoardState)) {
+              if(!isChecked(tempBoardState)) {
                 tempMove[pos[1] + fw()][pos[0] + 1] = MoveType.ep;
               }
             }
@@ -196,7 +197,7 @@ class ChessBoard {
             if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] - i > -1 || pos[1] - i < boardSize[1]) break;
+            if(pos[0] - i > -1 || pos[1] + i < boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X) break;
           }
@@ -206,7 +207,7 @@ class ChessBoard {
             if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] - i < boardSize[1]) break;
+            if(pos[0] + i < boardSize[0] || pos[1] + i < boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X) break;
           }
@@ -219,7 +220,7 @@ class ChessBoard {
             if(boardState[pos[1] - i][pos[0]].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < boardSize[1]; i++) {
-            if(pos[1] - i < boardSize[1]) break;
+            if(pos[1] + i < boardSize[1]) break;
             tempMove[pos[1] + i][pos[0]] = findMoveType(pos, [pos[0], pos[1] + i]);
             if(boardState[pos[1] + i][pos[0]].pieceType != PieceType.X) break;
           }
@@ -236,33 +237,13 @@ class ChessBoard {
           return tempMove;
 
         case PieceType.Q: // 퀸일 경우
-          for(int i = 1; i < boardSize[1]; i++) { //4방향에 대해 판단
-            if(pos[1] - i > -1) break;
-            tempMove[pos[1] - i][pos[0]] = findMoveType(pos, [pos[0], pos[1] - i]);
-            if(boardState[pos[1] - i][pos[0]].pieceType != PieceType.X) break;
-          }
-          for(int i = 1; i < boardSize[1]; i++) {
-            if(pos[1] - i < boardSize[1]) break;
-            tempMove[pos[1] + i][pos[0]] = findMoveType(pos, [pos[0], pos[1] + i]);
-            if(boardState[pos[1] + i][pos[0]].pieceType != PieceType.X) break;
-          }
-          for(int i = 1; i < boardSize[0]; i++) {
-            if(pos[0] - i > -1) break;
-            tempMove[pos[1]][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1]]);
-            if(boardState[pos[1]][pos[0] - i].pieceType != PieceType.X) break;
-          }
-          for(int i = 1; i < boardSize[0]; i++) {
-            if(pos[0] + i < boardSize[0]) break;
-            tempMove[pos[1]][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1]]);
-            if(boardState[pos[1]][pos[0] + i].pieceType != PieceType.X) break;
-          } // 여기까지 룩 로직
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) { //4방향에 대해 판단
             if(pos[0] - i > -1 || pos[1] - i > -1) break;
             tempMove[pos[1] - i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] - i]);
             if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] - i > -1 || pos[1] - i < boardSize[1]) break;
+            if(pos[0] - i > -1 || pos[1] + i < boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X) break;
           }
@@ -272,7 +253,27 @@ class ChessBoard {
             if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] - i < boardSize[1]) break;
+            if(pos[0] + i < boardSize[0] || pos[1] + i < boardSize[1]) break;
+            tempMove[pos[1] + i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] + i]);
+            if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X) break;
+          } // 여기까지 룩 로직
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) { //4방향에 대해 판단
+            if(pos[0] - i > -1 || pos[1] - i > -1) break;
+            tempMove[pos[1] - i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] - i]);
+            if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X) break;
+          }
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
+            if(pos[0] - i > -1 || pos[1] + i < boardSize[1]) break;
+            tempMove[pos[1] + i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] + i]);
+            if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X) break;
+          }
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
+            if(pos[0] + i < boardSize[0] || pos[1] - i > -1) break;
+            tempMove[pos[1] - i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] - i]);
+            if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X) break;
+          }
+          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
+            if(pos[0] + i < boardSize[0] || pos[1] + i < boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X) break;
           } // 여기까지 비숍 로직
@@ -307,7 +308,7 @@ class ChessBoard {
           if(isCastleAble[lastPlayer == Player.w ? CastleType.wK : CastleType.bK] ?? false){ // 킹사이드 캐슬링
             if(boardState[pos[1]][pos[0] + 1].pieceType == PieceType.X
                 || boardState[pos[1]][pos[0] + 2].pieceType == PieceType.X){
-              List<List<Pieces>> tempBoardState = boardState;
+              List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
               bool castleAble = true;
               tempBoardState[pos[1]][pos[0] + 3] = Pieces.nX;
@@ -325,7 +326,7 @@ class ChessBoard {
             if(boardState[pos[1]][pos[0] - 1].pieceType == PieceType.X
                 || boardState[pos[1]][pos[0] - 2].pieceType == PieceType.X
                 || boardState[pos[1]][pos[0] - 3].pieceType == PieceType.X){
-              List<List<Pieces>> tempBoardState = boardState;
+              List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
               bool castleAble = true;
               tempBoardState[pos[1]][pos[0] - 3] = Pieces.nX;
@@ -347,11 +348,12 @@ class ChessBoard {
     }
   }
 
+  //ui와 merge시 삭제할 부분
   void syncBoard(MoveType move, List<List<Pieces>> board) {} // 일단 함수가 존재한다고 가정
   PieceType getPromotePiece() {return PieceType.Q;}
 
-  // 두 지점을 입력받아, 이동 처리 후 syncBoard()함수에 이동코드, 보드상태를 전달하는 함수
-  // 프로모션 시에는 getPromotePiece()함수를 호출 후 처리 (변경가능)
+  // 두 지점을 입력받아, 이동 처리 후 외부의 syncBoard()함수에 이동코드, 보드상태를 전달하는 함수
+  // 프로모션 시에는 외부의 getPromotePiece()함수를 호출 후 처리 (변경가능)
   // 보드 밖을 참조하거나 불가능한 이동 시에는 이동 처리 없이 이동코드 x로 syncBoard()함수에 전달
   void turnMove(List<int> posStart, List<int> posEnd) {
     if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
@@ -386,7 +388,8 @@ class ChessBoard {
     }
   }
 
-  int turnPass(){ // 턴을 다음 사람에게 넘긴 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
+  // 턴을 다음 사람에게 넘긴 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
+  int turnPass(){
     switch(lastPlayer){
       case Player.w:
         lastPlayer = Player.b;
