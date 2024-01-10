@@ -661,9 +661,9 @@ class ChessBoard {
                 ifBoardState[a][b] = boardState[y][x];
                 ifBoardState[y][x] = Pieces.nX;
                 if (isChecked(ifBoardState)){
-                  return true;
-                } else {
                   continue;
+                } else {
+                  return false;
                 }
               } else {
                 continue;
@@ -675,6 +675,6 @@ class ChessBoard {
         }
       }
     }//현재 상황 보드 한 칸씩 검사 for 문
-    return false;
+    return true;
   }
 }
