@@ -1,5 +1,5 @@
 import 'duringGame.dart';
 
 bool canPieceMove(Piece piece, Position departure, Position destination) {
-  return destination.alphanumericPosition[0] == "a";
+  return destination.alphanumeric[0] == "a";
 }

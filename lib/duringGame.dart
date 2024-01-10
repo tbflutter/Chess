@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'decider.dart';
+import 'package:test11/immigration_office.dart';
+import 'chess_board.dart';
 
 class DuringGame extends StatefulWidget {
   const DuringGame({super.key});
@@ -9,12 +10,16 @@ class DuringGame extends StatefulWidget {
 }
 
 Board board = Board();
+ChessBoard _backBoard = ChessBoard();
 Piece? selectedPiece;
+BoardCommunication communicator = BoardCommunication.init(board, _backBoard);
 
 class _DuringGameState extends State<DuringGame> {
   @override
   void initState() {
     board.init(setState);
+    _backBoard.initBoard();
+    communicator.syncBoard(MoveType.x);
   }
 
   @override
@@ -37,19 +42,19 @@ class _DuringGameState extends State<DuringGame> {
 }
 
 class Board {
-  late List<Cell> rawCells;
+  late List<Cell> _rawCells;
   late dynamic setState;
 
   void init(setState) {
     this.setState = setState;
 
-    rawCells = List.generate(8 * 8, (index) {
+    _rawCells = List.generate(8 * 8, (index) {
       Color color = (index + index ~/ 8) % 2 == 0 ? Colors.white : Colors.black;
 
-      return Cell(color, setState, Position.index(index));
+      return Cell(color, setState, Position._set_index(index));
     });
 
-    setPiece(Position.alphanumeric("a2"), Pawn(Colors.white));
+    setPiece(Position("a2"), Pawn(Colors.white));
   }
 
   Widget build(BuildContext context) {
@@ -61,7 +66,7 @@ class Board {
             crossAxisCount: 8,
             // Generate 100 widgets that display their index in the List.
             children: List.generate(8 * 8, (index) {
-              return board.rawCells[index].build(context);
+              return board._rawCells[index].build(context);
             }),
           ),
         ],
@@ -71,118 +76,127 @@ class Board {
   }
 
   Cell getCell(Position position) {
-    return rawCells[position.indexPosition];
+    return _rawCells[position._index];
+  }
+
+  Piece? getPiece(Position position) {
+    return getCell(position).piece;
   }
 
   void setPiece(Position position, Piece? piece) {
     setState(() {
-      rawCells[position.indexPosition].piece = piece;
+      getCell(position).piece = piece;
       piece?.position = position;
     });
   }
 }
 
 class Position {
-  late String alphanumericPosition;
-  late int indexPosition;
+  late String alphanumeric;
+  late int _index;
 
-  Position.alphanumeric(this.alphanumericPosition) {
-    indexPosition = 0;
+  Position(this.alphanumeric) {
+    _index = 0;
 
-    switch (alphanumericPosition[0]) {
+    switch (alphanumeric[0]) {
       case "a":
-        indexPosition += 0;
+        _index += 0;
       case "b":
-        indexPosition += 1;
+        _index += 1;
       case "c":
-        indexPosition += 2;
+        _index += 2;
       case "d":
-        indexPosition += 3;
+        _index += 3;
       case "e":
-        indexPosition += 4;
+        _index += 4;
       case "f":
-        indexPosition += 5;
+        _index += 5;
       case "g":
-        indexPosition += 6;
+        _index += 6;
       case "h":
-        indexPosition += 7;
+        _index += 7;
     }
 
-    switch (alphanumericPosition[1]) {
+    switch (alphanumeric[1]) {
       case "1":
-        indexPosition += 0;
+        _index += 56;
       case "2":
-        indexPosition += 8;
+        _index += 48;
       case "3":
-        indexPosition += 16;
+        _index += 40;
       case "4":
-        indexPosition += 24;
+        _index += 32;
       case "5":
-        indexPosition += 32;
+        _index += 24;
       case "6":
-        indexPosition += 40;
+        _index += 16;
       case "7":
-        indexPosition += 48;
+        _index += 8;
       case "8":
-        indexPosition += 56;
+        _index += 0;
     }
   }
 
-  Position.index(this.indexPosition) {
-    alphanumericPosition = "";
+  Position._set_index(this._index) {
+    alphanumeric = "";
 
-    switch (indexPosition % 8) {
+    switch (_index % 8) {
       case 0:
-        alphanumericPosition += "a";
+        alphanumeric += "a";
       case 1:
-        alphanumericPosition += "b";
+        alphanumeric += "b";
       case 2:
-        alphanumericPosition += "c";
+        alphanumeric += "c";
       case 3:
-        alphanumericPosition += "d";
+        alphanumeric += "d";
       case 4:
-        alphanumericPosition += "e";
+        alphanumeric += "e";
       case 5:
-        alphanumericPosition += "f";
+        alphanumeric += "f";
       case 6:
-        alphanumericPosition += "g";
+        alphanumeric += "g";
       case 7:
-        alphanumericPosition += "h";
+        alphanumeric += "h";
     }
 
-    switch ((indexPosition ~/ 8) * 8) {
+    switch ((_index ~/ 8) * 8) {
       case 0:
-        alphanumericPosition += "1";
+        alphanumeric += "8";
       case 8:
-        alphanumericPosition += "2";
+        alphanumeric += "7";
       case 16:
-        alphanumericPosition += "3";
+        alphanumeric += "6";
       case 24:
-        alphanumericPosition += "4";
+        alphanumeric += "5";
       case 32:
-        alphanumericPosition += "5";
+        alphanumeric += "4";
       case 40:
-        alphanumericPosition += "6";
+        alphanumeric += "3";
       case 48:
-        alphanumericPosition += "7";
+        alphanumeric += "2";
       case 56:
-        alphanumericPosition += "8";
+        alphanumeric += "1";
     }
   }
 }
-
-class Pieces {}
 
 class Piece {
   late String imageDirectory;
   late AssetImage targetImage;
   late Widget body;
   late Position position;
+  late Color color;
 
   Widget setBody(Widget child) {
     body = GestureDetector(
       onTap: () {
-        selectedPiece = this;
+        if (selectedPiece != null) {
+          communicator.sendMovingRequest(
+              selectedPiece!, selectedPiece!.position, this.position);
+          selectedPiece = null;
+        } else {
+          selectedPiece = this;
+        }
       },
       child: child,
     );
@@ -190,15 +204,12 @@ class Piece {
     return body;
   }
 
-  Piece(Color color) {
+  Piece(this.color) {
     imageDirectory =
         color == Colors.white ? "assets/pieces/white" : "assets/pieces/black";
   }
 
-  void move(Position destination) {
-    Position departure = position;
-
-    // Validation
+/*
     if (canPieceMove(this, departure, destination)) {
       // Move
       board.setPiece(departure, null);
@@ -206,12 +217,66 @@ class Piece {
     } else {
       selectedPiece = null;
     }
-  }
+    */
 }
 
 class Pawn extends Piece {
-  Pawn(super.imageDirectory) {
-    AssetImage targetImage = AssetImage("$imageDirectory/pawn.png");
+  Pawn(super.color) {
+    AssetImage targetImage = AssetImage("${super.imageDirectory}/pawn.png");
+
+    setBody(
+      Image(image: targetImage),
+    );
+  }
+}
+
+class Bishop extends Piece {
+  Bishop(super.imageDirectory) {
+    AssetImage targetImage = AssetImage("$imageDirectory/bishop.png");
+
+    setBody(
+      Image(image: targetImage),
+    );
+  }
+}
+
+class Knight extends Piece {
+  Knight(super.imageDirectory) {
+    AssetImage targetImage = AssetImage("$imageDirectory/knight.png");
+
+    setBody(
+      Image(image: targetImage),
+    );
+  }
+}
+
+class Rook extends Piece {
+  bool hasMoved = false;
+
+  Rook(super.imageDirectory) {
+    AssetImage targetImage = AssetImage("$imageDirectory/rook.png");
+
+    setBody(
+      Image(image: targetImage),
+    );
+  }
+}
+
+class Queen extends Piece {
+  Queen(super.imageDirectory) {
+    AssetImage targetImage = AssetImage("$imageDirectory/queen.png");
+
+    setBody(
+      Image(image: targetImage),
+    );
+  }
+}
+
+class King extends Piece {
+  bool hasMoved = false;
+
+  King(super.imageDirectory) {
+    AssetImage targetImage = AssetImage("$imageDirectory/king.png");
 
     setBody(
       Image(image: targetImage),
@@ -234,8 +299,11 @@ class Cell {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            selectedPiece?.move(position);
-            selectedPiece = null;
+            if (selectedPiece != null) {
+              communicator.sendMovingRequest(
+                  selectedPiece!, selectedPiece!.position, this.position);
+              selectedPiece = null;
+            }
           });
         },
         child: Container(
