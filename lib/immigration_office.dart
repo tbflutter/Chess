@@ -14,10 +14,10 @@ class BoardCommunication {
 
     print(departure.alphanumeric);
     print(intDeparture);
-    print(backBoard.boardState[intDeparture[0]][intDeparture[1]]);
+    print(backBoard.boardState[intDeparture[1]][intDeparture[0]]);
     print(destination.alphanumeric);
     print(intDestination);
-    print(backBoard.boardState[intDestination[0]][intDestination[1]]);
+    print(backBoard.boardState[intDestination[1]][intDestination[0]]);
     backBoard.turnMove(intDeparture, intDestination);
     print("");
   }
@@ -28,9 +28,9 @@ class BoardCommunication {
         List.generate(ChessBoard.boardSize[0], (j) => Translate.backPiece_to_frontPiece(backBoard.boardState[i][j])));
 
     for (int i = 0; i < transcribedBoard.length; i++) {
-      for (int j = 0; j < transcribedBoard.length; j++) {
+      for (int j = 0; j < transcribedBoard[0].length; j++) {
         Position position = Translate.backPosition_to_frontPosition([i, j]);
-        Piece? piece = transcribedBoard[i][j];
+        Piece? piece = transcribedBoard[j][i];
         frontBoard.setPiece(position, piece);
       }
     }
@@ -42,12 +42,12 @@ class Translate {
     int file = position.alphanumeric.codeUnitAt(0) - 97;
     int rank = 7 - (int.parse(position.alphanumeric[1]) - 1);
 
-    return [rank, file];
+    return [file, rank];
   }
   
   static Position backPosition_to_frontPosition(List<int> position) {
-    String file = String.fromCharCode(position[1] + 97);
-    String rank = String.fromCharCode((7 - position[0]) + 49);
+    String file = String.fromCharCode(position[0] + 97);
+    String rank = String.fromCharCode((7 - position[1]) + 49);
 
     return Position(file + rank);
   }
