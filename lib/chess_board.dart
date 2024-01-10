@@ -446,38 +446,44 @@ class ChessBoard {
 
   bool isChecked(List<List<Pieces>> boardState) {
     List<int> pos = KingPos(boardState); //킹의 좌표 중심 생각
+    final KingPlayer = boardState[pos[1]][pos[0]].controller;//판단 대상 킹의 주인을 변수로 불러옴
+    late var CheckCo; //로직에서 체크하는 좌표를 담은 변수로 사용함
     //----1. 룩에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1] - i][pos[0]].pieceType == PieceType.X) {} else
-      if (boardState[pos[1] - i][pos[0]].pieceType == PieceType.R ||
-          boardState[pos[1] - i][pos[0]].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1] - i][pos[0]];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
       }
     } // 아래로 확인
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1] + i][pos[0]].pieceType == PieceType.X) {} else
-      if (boardState[pos[1] + i][pos[0]].pieceType == PieceType.R ||
-          boardState[pos[1] + i][pos[0]].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1] + i][pos[0]];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
       }
     } // 위로 확인
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1]][pos[0] - i].pieceType == PieceType.X) {} else
-      if (boardState[pos[1]][pos[0] - i].pieceType == PieceType.R ||
-          boardState[pos[1]][pos[0] - i].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1]][pos[0] - i];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
       }
     } // 좌로 확인
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1]][pos[0] + i].pieceType == PieceType.X) {} else
-      if (boardState[pos[1]][pos[0] + i].pieceType == PieceType.R ||
-          boardState[pos[1]][pos[0] + i].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1]][pos[0] + i];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
@@ -485,36 +491,40 @@ class ChessBoard {
     } // 우로 확인, 룩 확인 종료
     //----2. 비숍에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1] - i][pos[0] - i].pieceType == PieceType.X) {} else
-      if (boardState[pos[1] - i][pos[0] - i].pieceType == PieceType.B ||
-          boardState[pos[1] - i][pos[0] - i].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1] - i][pos[0] - i];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
       }
     } // 좌측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1] + i][pos[0] - i].pieceType == PieceType.X) {} else
-      if (boardState[pos[1] + i][pos[0] - i].pieceType == PieceType.B ||
-          boardState[pos[1] + i][pos[0] - i].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1] + i][pos[0] - i];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
       }
     } // 좌측 위 대각선 확인
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1] - i][pos[0] + i].pieceType == PieceType.X) {} else
-      if (boardState[pos[1] - i][pos[0] + i].pieceType == PieceType.B ||
-          boardState[pos[1] - i][pos[0] + i].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1] - i][pos[0] + i];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
       }
     } // 우측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
-      if (boardState[pos[1] + i][pos[0] + i].pieceType == PieceType.X) {} else
-      if (boardState[pos[1] + i][pos[0] + i].pieceType == PieceType.B ||
-          boardState[pos[1] + i][pos[0] + i].pieceType == PieceType.Q) {
+      CheckCo = boardState[pos[1] + i][pos[0] + i];
+      if (CheckCo.pieceType == PieceType.X) {} else
+      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
+          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
         continue;
@@ -523,53 +533,63 @@ class ChessBoard {
     //----3. 나이트에 의한 체크 위협 상황 여부 판별----
     //나이트는 좌표기준 고정된 8개 자리를 확인
     if (pos[0] - 2 > -1 && pos[1] - 1 > -1) {
-      if (boardState[pos[1] - 1][pos[0] - 2].pieceType == PieceType.N) {
+      if (boardState[pos[1] - 1][pos[0] - 2].pieceType == PieceType.N
+          && boardState[pos[1] - 1][pos[0] - 2].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] - 1 > -1 && pos[1] - 2 > -1) {
-      if (boardState[pos[1] - 2][pos[0] - 1].pieceType == PieceType.N) {
+      if (boardState[pos[1] - 2][pos[0] - 1].pieceType == PieceType.N
+          && boardState[pos[1] - 2][pos[0] - 1].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] - 2 > -1 && pos[1] + 1 < boardSize[1]) {
-      if (boardState[pos[1] + 1][pos[0] - 2].pieceType == PieceType.N) {
+      if (boardState[pos[1] + 1][pos[0] - 2].pieceType == PieceType.N
+          && boardState[pos[1] + 1][pos[0] - 2].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] - 1 > -1 && pos[1] + 2 < boardSize[1]) {
-      if (boardState[pos[1] + 2][pos[0] - 1].pieceType == PieceType.N) {
+      if (boardState[pos[1] + 2][pos[0] - 1].pieceType == PieceType.N
+          && boardState[pos[1] + 2][pos[0] - 1].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 2 < boardSize[0] && pos[1] - 1 > -1) {
-      if (boardState[pos[1] - 1][pos[0] + 2].pieceType == PieceType.N) {
+      if (boardState[pos[1] - 1][pos[0] + 2].pieceType == PieceType.N
+          && boardState[pos[1] - 1][pos[0] + 2].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 1 < boardSize[0] && pos[1] - 2 > -1) {
-      if (boardState[pos[1] - 2][pos[0] + 1].pieceType == PieceType.N) {
+      if (boardState[pos[1] - 2][pos[0] + 1].pieceType == PieceType.N
+          && boardState[pos[1] - 2][pos[0] + 1].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 2 < boardSize[0] && pos[1] + 1 < boardSize[1]) {
-      if (boardState[pos[1] + 1][pos[0] + 2].pieceType == PieceType.N) {
+      if (boardState[pos[1] + 1][pos[0] + 2].pieceType == PieceType.N
+          && boardState[pos[1] + 1][pos[0] + 2].controller != KingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 1 < boardSize[0] && pos[1] + 2 < boardSize[1]) {
-      if (boardState[pos[1] + 2][pos[0] + 1].pieceType == PieceType.N) {
+      if (boardState[pos[1] + 2][pos[0] + 1].pieceType == PieceType.N
+          && boardState[pos[1] + 2][pos[0] + 1].controller != KingPlayer) {
         return true;
       } else {}
     } //나이트 확인 종료
     //----4.폰에 의한 체크 위협 상황 여부 판별----
-    if (pos[0] - 1 > -1) {
-      if (boardState[pos[1] - fw()][pos[0] - 1].pieceType == PieceType.P) {
+    if (pos[0] - 1 > -1 && -1 < pos[1] - fw() && pos[1] - fw() < boardSize[1]) {
+      if (boardState[pos[1] - fw()][pos[0] - 1].pieceType == PieceType.P
+          && boardState[pos[1] - fw()][pos[0] - 1].controller != KingPlayer) {
         return true;
       } else {}
     }
-    if(pos[0] + 1 < boardSize[0]) {
-      if (boardState[pos[1] - fw()][pos[0] + 1].pieceType == PieceType.P) {
+    if(pos[0] + 1 < boardSize[0] && -1 < pos[1] - fw() && pos[1] - fw() < boardSize[1]) {
+      if (boardState[pos[1] - fw()][pos[0] + 1].pieceType == PieceType.P
+          && boardState[pos[1] - fw()][pos[0] + 1].controller != KingPlayer) {
         return true;
       } else {}
     }//폰 확인 종료
