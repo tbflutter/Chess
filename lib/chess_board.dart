@@ -8,6 +8,10 @@ enum Pieces { // 기물 목록
   final Player controller;
   final PieceType pieceType;
   const Pieces(this.controller, this.pieceType);
+
+  factory Pieces.getPiece(Player ctr, PieceType pT) {
+    return values.firstWhere((e) => e.controller == ctr && e.pieceType == pT);
+  }
 }
 enum Player { // 흰색, 검은색, 중립
   w, b, n
@@ -25,7 +29,8 @@ enum CastleType {
 class ChessBoard {
   static final List<int> boardSize = [8,8]; //가로, 세로
   late List<List<Pieces>> boardState; //기물 위치
-  int epFile = -1; //앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
+  int epFile = -1; // 앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
+  int drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수, 75가 되면 무승부
   late Map<CastleType, bool> isCastleAble; // 캐슬링 가능 여부
   Player lastPlayer = Player.w; //현재 턴인 사람
   int fw() => (lastPlayer == Player.w ? -1 : 1); // 폰이 이동하는 방향
@@ -325,6 +330,45 @@ class ChessBoard {
     }
   }
 
+  void syncBoard(MoveType move, List<List<Pieces>> board) {} // 일단 함수가 존재한다고 가정
+  PieceType getPromotePiece() {return PieceType.Q;}
+
+  // 두 지점을 입력받아, 이동 처리 후 syncBoard()함수에 이동코드, 보드상태를 전달하는 함수
+  // 프로모션 시에는 getPromotePiece()함수를 호출 후 처리 (변경가능)
+  // 보드 밖을 참조하거나 불가능한 이동 시에는 이동 처리 없이 이동코드 x로 syncBoard()함수에 전달
+  void turnMove(List<int> posStart, List<int> posEnd) {
+    if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
+      syncBoard(MoveType.x, boardState); // 보드 외부에 이동 시도
+    }
+    else if(posEnd[0] <= -1 || posEnd[0] >= boardSize[0] || posEnd[1] <= -1 || posEnd[1] >= boardSize[1]){
+      syncBoard(MoveType.x, boardState); // 보드 외부에 이동 시도
+    }
+
+    MoveType move = moveCalc(posStart)[posEnd[1]][posEnd[0]];
+
+    if(move == MoveType.x){
+      syncBoard(move, boardState); // 불가능한 이동 시도
+    }
+    else if(move == MoveType.n || move == MoveType.c || move == MoveType.p2 || move == MoveType.ep){
+      moveNormal(move, posStart, posEnd);
+      syncBoard(move, boardState);
+    }
+    else if(move == MoveType.ca){
+      if(posEnd[0] == posStart[0] + 2){
+        moveCastle(lastPlayer == Player.w ? CastleType.wK : CastleType.bK);
+      }
+      else if(posEnd[0] == posStart[0] - 2){
+        moveCastle(lastPlayer == Player.w ? CastleType.wQ : CastleType.bQ);
+      }
+      syncBoard(move, boardState);
+    }
+    else if(move == MoveType.pm || move == MoveType.cpm){
+      Pieces promotePiece = Pieces.getPiece(lastPlayer, getPromotePiece());
+      movePromote(promotePiece, posStart, posEnd);
+      syncBoard(move, boardState);
+    }
+  }
+
   int turnPass(){ // 턴을 다음 사람에게 넘긴 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
     switch(lastPlayer){
       case Player.w:
@@ -335,7 +379,7 @@ class ChessBoard {
         return 0;
       case Player.n:
         return 3; // 잘못된 플레이어 턴
-    }git a
+    }
   }
 
   // 이동코드, 이동 시작과 끝 좌표를 받아 이동 처리 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
@@ -358,6 +402,12 @@ class ChessBoard {
           boardState[posStart[1] - fw()][posStart[0]] = Pieces.nX;
         }
       }
+      if(startPiece.pieceType == PieceType.P || move == MoveType.c){
+        drawClock = 0;
+      }
+      else if(lastPlayer == Player.b){
+        drawClock++;
+      }
 
       if(turnPass() != 0){
         return 3; // 잘못된 플레이어 턴
@@ -379,6 +429,7 @@ class ChessBoard {
       boardState[posStart[1]][posStart[0]] = Pieces.nX;
 
       epFile = -1;
+      drawClock = 0;
       if(turnPass() != 0){
         return 3; // 잘못된 플레이어 턴
       }
@@ -421,6 +472,7 @@ class ChessBoard {
     }
 
     epFile = -1;
+    drawClock = 0;
     if(turnPass() != 0){
       return 3; // 잘못된 플레이어 턴
     }
