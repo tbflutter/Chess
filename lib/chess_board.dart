@@ -192,22 +192,22 @@ class ChessBoard {
 
         case PieceType.B: // 비숍일 경우
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) { //4방향에 대해 판단
-            if(pos[0] - i > -1 || pos[1] - i > -1) break;
+            if(pos[0] - i <= -1 || pos[1] - i <= -1) break;
             tempMove[pos[1] - i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] - i]);
             if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] - i > -1 || pos[1] + i < boardSize[1]) break;
+            if(pos[0] - i <= -1 || pos[1] + i >= boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] - i > -1) break;
+            if(pos[0] + i >= boardSize[0] || pos[1] - i <= -1) break;
             tempMove[pos[1] - i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] - i]);
             if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] + i < boardSize[1]) break;
+            if(pos[0] + i >= boardSize[0] || pos[1] + i >= boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X) break;
           }
@@ -215,22 +215,22 @@ class ChessBoard {
 
         case PieceType.R: //룩일 경우
           for(int i = 1; i < boardSize[1]; i++) { //4방향에 대해 판단
-            if(pos[1] - i > -1) break;
+            if(pos[1] - i <= -1) break;
             tempMove[pos[1] - i][pos[0]] = findMoveType(pos, [pos[0], pos[1] - i]);
             if(boardState[pos[1] - i][pos[0]].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < boardSize[1]; i++) {
-            if(pos[1] + i < boardSize[1]) break;
+            if(pos[1] + i >= boardSize[1]) break;
             tempMove[pos[1] + i][pos[0]] = findMoveType(pos, [pos[0], pos[1] + i]);
             if(boardState[pos[1] + i][pos[0]].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < boardSize[0]; i++) {
-            if(pos[0] - i > -1) break;
+            if(pos[0] - i <= -1) break;
             tempMove[pos[1]][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1]]);
             if(boardState[pos[1]][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < boardSize[0]; i++) {
-            if(pos[0] + i < boardSize[0]) break;
+            if(pos[0] + i >= boardSize[0]) break;
             tempMove[pos[1]][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1]]);
             if(boardState[pos[1]][pos[0] + i].pieceType != PieceType.X) break;
           }
@@ -238,45 +238,45 @@ class ChessBoard {
 
         case PieceType.Q: // 퀸일 경우
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) { //4방향에 대해 판단
-            if(pos[0] - i > -1 || pos[1] - i > -1) break;
+            if(pos[0] - i <= -1 || pos[1] - i <= -1) break;
             tempMove[pos[1] - i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] - i]);
             if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] - i > -1 || pos[1] + i < boardSize[1]) break;
+            if(pos[0] - i <= -1 || pos[1] + i >= boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] - i > -1) break;
+            if(pos[0] + i >= boardSize[0] || pos[1] - i <= -1) break;
             tempMove[pos[1] - i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] - i]);
             if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X) break;
           }
           for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] + i < boardSize[1]) break;
-            tempMove[pos[1] + i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] + i]);
-            if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X) break;
-          } // 여기까지 룩 로직
-          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) { //4방향에 대해 판단
-            if(pos[0] - i > -1 || pos[1] - i > -1) break;
-            tempMove[pos[1] - i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] - i]);
-            if(boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.X) break;
-          }
-          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] - i > -1 || pos[1] + i < boardSize[1]) break;
-            tempMove[pos[1] + i][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1] + i]);
-            if(boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.X) break;
-          }
-          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] - i > -1) break;
-            tempMove[pos[1] - i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] - i]);
-            if(boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.X) break;
-          }
-          for(int i = 1; i < (boardSize[0] + boardSize[1]); i++) {
-            if(pos[0] + i < boardSize[0] || pos[1] + i < boardSize[1]) break;
+            if(pos[0] + i >= boardSize[0] || pos[1] + i >= boardSize[1]) break;
             tempMove[pos[1] + i][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1] + i]);
             if(boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.X) break;
           } // 여기까지 비숍 로직
+          for(int i = 1; i < boardSize[1]; i++) { //4방향에 대해 판단
+            if(pos[1] - i <= -1) break;
+            tempMove[pos[1] - i][pos[0]] = findMoveType(pos, [pos[0], pos[1] - i]);
+            if(boardState[pos[1] - i][pos[0]].pieceType != PieceType.X) break;
+          }
+          for(int i = 1; i < boardSize[1]; i++) {
+            if(pos[1] + i >= boardSize[1]) break;
+            tempMove[pos[1] + i][pos[0]] = findMoveType(pos, [pos[0], pos[1] + i]);
+            if(boardState[pos[1] + i][pos[0]].pieceType != PieceType.X) break;
+          }
+          for(int i = 1; i < boardSize[0]; i++) {
+            if(pos[0] - i <= -1) break;
+            tempMove[pos[1]][pos[0] - i] = findMoveType(pos, [pos[0] - i, pos[1]]);
+            if(boardState[pos[1]][pos[0] - i].pieceType != PieceType.X) break;
+          }
+          for(int i = 1; i < boardSize[0]; i++) {
+            if(pos[0] + i >= boardSize[0]) break;
+            tempMove[pos[1]][pos[0] + i] = findMoveType(pos, [pos[0] + i, pos[1]]);
+            if(boardState[pos[1]][pos[0] + i].pieceType != PieceType.X) break;
+          } // 여기까지 룩 로직
           return tempMove;
 
         case PieceType.K: // 킹일 경우
