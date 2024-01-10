@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'decider.dart';
 
 class DuringGame extends StatefulWidget {
   const DuringGame({super.key});
@@ -18,8 +19,6 @@ class _DuringGameState extends State<DuringGame> {
 
   @override
   Widget build(BuildContext context) {
-    // board.init(setState);
-
     return MaterialApp(
       home: PopScope(
         canPop: false,
@@ -200,7 +199,7 @@ class Piece {
     Position departure = position;
 
     // Validation
-    if (true) {
+    if (canPieceMove(this, departure, destination)) {
       // Move
       board.setPiece(departure, null);
       board.setPiece(destination, this);
