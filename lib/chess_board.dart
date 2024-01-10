@@ -90,7 +90,7 @@ class ChessBoard {
     }
     else{
       if(endPiece == Pieces.nX){
-        if(startPiece.pieceType == PieceType.P || (posStart[1] + fw()) == pmRank()){
+        if(startPiece.pieceType == PieceType.P && (posStart[1] + fw()) == pmRank()){
           return MoveType.pm;
         }
         return MoveType.n;
@@ -99,7 +99,7 @@ class ChessBoard {
         return MoveType.x;
       }
       else{
-        if(startPiece.pieceType == PieceType.P || (posStart[1] + fw()) == pmRank()){
+        if(startPiece.pieceType == PieceType.P && (posStart[1] + fw()) == pmRank()){
           return MoveType.cpm;
         }
         return MoveType.c;
