@@ -343,77 +343,126 @@ class ChessBoard {
           boardState[pos[1] - i][pos[0]].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 아래로 확인
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1] + i][pos[0]].pieceType == PieceType.X) {} else
       if (boardState[pos[1] + i][pos[0]].pieceType == PieceType.R ||
-          boardState[pos[1] + i][pos[0]].pieceType != PieceType.Q) {
+          boardState[pos[1] + i][pos[0]].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 위로 확인
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1]][pos[0] - i].pieceType == PieceType.X) {} else
       if (boardState[pos[1]][pos[0] - i].pieceType == PieceType.R ||
-          boardState[pos[1]][pos[0] - i].pieceType != PieceType.Q) {
+          boardState[pos[1]][pos[0] - i].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 좌로 확인
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1]][pos[0] + i].pieceType == PieceType.X) {} else
       if (boardState[pos[1]][pos[0] + i].pieceType == PieceType.R ||
-          boardState[pos[1]][pos[0] + i].pieceType != PieceType.Q) {
+          boardState[pos[1]][pos[0] + i].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 우로 확인, 룩 확인 종료
     //----2. 비숍에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1] - i][pos[0] - i].pieceType == PieceType.X) {} else
       if (boardState[pos[1] - i][pos[0] - i].pieceType == PieceType.B ||
-          boardState[pos[1] - i][pos[0] - i].pieceType != PieceType.Q) {
+          boardState[pos[1] - i][pos[0] - i].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 좌측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1] + i][pos[0] - i].pieceType == PieceType.X) {} else
       if (boardState[pos[1] + i][pos[0] - i].pieceType == PieceType.B ||
-          boardState[pos[1] + i][pos[0] - i].pieceType != PieceType.Q) {
+          boardState[pos[1] + i][pos[0] - i].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 좌측 위 대각선 확인
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1] - i][pos[0] + i].pieceType == PieceType.X) {} else
       if (boardState[pos[1] - i][pos[0] + i].pieceType == PieceType.B ||
-          boardState[pos[1] - i][pos[0] + i].pieceType != PieceType.Q) {
+          boardState[pos[1] - i][pos[0] + i].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 우측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
       if (boardState[pos[1] + i][pos[0] + i].pieceType == PieceType.X) {} else
       if (boardState[pos[1] + i][pos[0] + i].pieceType == PieceType.B ||
-          boardState[pos[1] + i][pos[0] + i].pieceType != PieceType.Q) {
+          boardState[pos[1] + i][pos[0] + i].pieceType == PieceType.Q) {
         return true;
       } else {
-        break;
+        continue;
       }
     } // 우측 위 대각선 확인, 비숍 확인 종료
     //----3. 나이트에 의한 체크 위협 상황 여부 판별----
-    //나이트 및 기타 기물 체크 시 보드에서 나가는지 확인 코드 추가 필요
-    if (boardState[pos[1] - 2][pos[0] - 1].pieceType != PieceType.X) {
-
+    //나이트는 좌표기준 고정된 8개 자리를 확인
+    if (pos[0] - 2 > -1 && pos[1] - 1 > -1) {
+      if (boardState[pos[1] - 1][pos[0] - 2].pieceType == PieceType.N) {
+        return true;
+      } else {}
     }
+    if (pos[0] - 1 > -1 && pos[1] - 2 > -1) {
+      if (boardState[pos[1] - 2][pos[0] - 1].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    }
+    if (pos[0] - 2 > -1 && pos[1] + 1 < boardSize[1]) {
+      if (boardState[pos[1] + 1][pos[0] - 2].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    }
+    if (pos[0] - 1 > -1 && pos[1] + 2 < boardSize[1]) {
+      if (boardState[pos[1] + 2][pos[0] - 1].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    }
+    if (pos[0] + 2 < boardSize[0] && pos[1] - 1 > -1) {
+      if (boardState[pos[1] - 1][pos[0] + 2].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    }
+    if (pos[0] + 1 < boardSize[0] && pos[1] - 2 > -1) {
+      if (boardState[pos[1] - 2][pos[0] + 1].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    }
+    if (pos[0] + 2 < boardSize[0] && pos[1] + 1 < boardSize[1]) {
+      if (boardState[pos[1] + 1][pos[0] + 2].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    }
+    if (pos[0] + 1 < boardSize[0] && pos[1] + 2 < boardSize[1]) {
+      if (boardState[pos[1] + 2][pos[0] + 1].pieceType == PieceType.N) {
+        return true;
+      } else {}
+    } //나이트 확인 종료
+    //----4.폰에 의한 체크 위협 상황 여부 판별----
+    if (pos[0] - 1 > -1) {
+      if (boardState[pos[1] - fw()][pos[0] - 1].pieceType == PieceType.P) {
+        return true;
+      } else {}
+    }
+    if(pos[0] + 1 < boardSize[0]) {
+      if (boardState[pos[1] - fw()][pos[0] + 1].pieceType == PieceType.P) {
+        return true;
+      } else {}
+    }//폰 확인 종료
+    return false;
   }
 }
