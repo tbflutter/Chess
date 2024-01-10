@@ -31,7 +31,7 @@ class ChessBoard {
   late List<List<Pieces>> boardState; //기물 위치
   int epFile = -1; // 앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
   int drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수, 75가 되면 무승부
-  late Map<CastleType, bool> isCastleAble; // 캐슬링 가능 여부
+  late Map<CastleType,bool> isCastleAble; // 캐슬링 가능 여부
   Player lastPlayer = Player.w; //현재 턴인 사람
   int fw() => (lastPlayer == Player.w ? -1 : 1); // 폰이 이동하는 방향
   int pmRank() => (lastPlayer == Player.w ? 0 : boardSize[1] - 1); //폰이 프로모션하는 랭크(세로 좌표)
@@ -53,6 +53,22 @@ class ChessBoard {
       CastleType.bK : true,
       CastleType.bQ : true,
     }; // 모든 캐슬링(백킹, 백퀸, 흑킹, 흑퀸) 가능으로 설정
+  }
+
+  Map<Pieces, int> getPieceCount() { // 보드의 기물 수를 각각 세어주는 함수
+    Map<Pieces,int> pieceCount = {
+      Pieces.nX : 0,
+      Pieces.wP : 0, Pieces.wN : 0, Pieces.wB : 0, Pieces.wR : 0, Pieces.wQ : 0, Pieces.wK : 0,
+      Pieces.bP : 0, Pieces.bN : 0, Pieces.bB : 0, Pieces.bR : 0, Pieces.bQ : 0, Pieces.bK : 0,
+    };
+    for (int i = 0; i < boardSize[1]; i++) {
+      for (int j = 0; j < boardSize[0]; j++) {
+        int temp = pieceCount[boardState[i][j]]!;
+        temp++;
+        pieceCount[boardState[i][j]] = temp;
+      }
+    }
+    return pieceCount;
   }
 
   // posStart(시작좌표), posEnd (끝좌표)를 받아 시작좌표의 기물이 끝좌표로 이동할때의 이동 방식을 리턴
@@ -661,9 +677,9 @@ class ChessBoard {
                 ifBoardState[a][b] = boardState[y][x];
                 ifBoardState[y][x] = Pieces.nX;
                 if (isChecked(ifBoardState)){
-                  return true;
-                } else {
                   continue;
+                } else {
+                  return false;
                 }
               } else {
                 continue;
@@ -675,6 +691,6 @@ class ChessBoard {
         }
       }
     }//현재 상황 보드 한 칸씩 검사 for 문
-    return false;
+    return true;
   }
 }
