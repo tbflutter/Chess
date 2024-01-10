@@ -18,12 +18,15 @@ enum PieceType { // 없음, 폰, 나이트, 비숍, 룩, 퀸, 킹
 enum MoveType { // 이동불가, 일반이동, 잡는이동, 캐슬링 이동, 폰 초기 2칸 전진,
   x, n, c, ca, p2, pm, cpm, ep // 폰 이동 후 프로모션, 폰 잡기 후 프로모션, 앙파상
 }
+enum CastleType {
+  wK, wQ, bK, bQ, // 캐슬링(백 킹사이드, 백 퀸사이드, 흑 킹사이드, 흑 퀸사이드)
+}
 
 class ChessBoard {
   static final List<int> boardSize = [8,8]; //가로, 세로
   late List<List<Pieces>> boardState; //기물 위치
   int epFile = -1; //앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
-  late Map<String, bool> isCastleAble; // 캐슬링 가능 여부
+  late Map<CastleType, bool> isCastleAble; // 캐슬링 가능 여부
   Player lastPlayer = Player.w; //현재 턴인 사람
   int fw() => (lastPlayer == Player.w ? -1 : 1); // 폰이 이동하는 방향
   int pmRank() => (lastPlayer == Player.w ? 0 : boardSize[1] - 1); //폰이 프로모션하는 랭크(세로 좌표)
@@ -40,15 +43,19 @@ class ChessBoard {
       [Pieces.wR, Pieces.wN, Pieces.wB, Pieces.wQ, Pieces.wK, Pieces.wB, Pieces.wN, Pieces.wR,],
     ]; // 초기 보드 상태
     isCastleAble = {
-      "wKside" : true,
-      "wQside" : true,
-      "bKside" : true,
-      "bQside" : true,
+      CastleType.wK : true,
+      CastleType.wQ : true,
+      CastleType.bK : true,
+      CastleType.bQ : true,
     }; // 모든 캐슬링(백킹, 백퀸, 흑킹, 흑퀸) 가능으로 설정
   }
 
   // posStart(시작좌표), posEnd (끝좌표)를 받아 시작좌표의 기물이 끝좌표로 이동할때의 이동 방식을 리턴
   MoveType findMoveType(List<int> posStart, List<int> posEnd) {
+    if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
+      return MoveType.x; // 보드 외부에 이동 시도
+    }
+
     List<List<Pieces>> tempBoardState = boardState;
     Pieces startPiece = tempBoardState[posStart[1]][posStart[0]];
     Pieces endPiece = tempBoardState[posEnd[1]][posEnd[0]];
@@ -275,7 +282,7 @@ class ChessBoard {
             tempMove[pos[1] + 1][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1] + 1]);
           }
 
-          if(isCastleAble[lastPlayer == Player.w ? "wKside" : "bKside"] ?? false){ // 킹사이드 캐슬링
+          if(isCastleAble[lastPlayer == Player.w ? CastleType.wK : CastleType.bK] ?? false){ // 킹사이드 캐슬링
             if(boardState[pos[1]][pos[0] + 1].pieceType == PieceType.X
                 || boardState[pos[1]][pos[0] + 2].pieceType == PieceType.X){
               List<List<Pieces>> tempBoardState = boardState;
@@ -292,7 +299,7 @@ class ChessBoard {
               if(castleAble) tempMove[pos[1]][pos[0] + 2] = MoveType.ca;
             }
           }
-          if(isCastleAble[lastPlayer == Player.w ? "wQside" : "bQside"] ?? false){ // 퀸사이드 캐슬링
+          if(isCastleAble[lastPlayer == Player.w ? CastleType.wQ : CastleType.bQ] ?? false){ // 퀸사이드 캐슬링
             if(boardState[pos[1]][pos[0] - 1].pieceType == PieceType.X
                 || boardState[pos[1]][pos[0] - 2].pieceType == PieceType.X
                 || boardState[pos[1]][pos[0] - 3].pieceType == PieceType.X){
@@ -317,6 +324,109 @@ class ChessBoard {
       }
     }
   }
+
+  int turnPass(){ // 턴을 다음 사람에게 넘긴 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
+    switch(lastPlayer){
+      case Player.w:
+        lastPlayer = Player.b;
+        return 0;
+      case Player.b:
+        lastPlayer = Player.w;
+        return 0;
+      case Player.n:
+        return 3; // 잘못된 플레이어 턴
+    }git a
+  }
+
+  // 이동코드, 이동 시작과 끝 좌표를 받아 이동 처리 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
+  // 가능한 이동코드 : n, c, p2, ep
+  int moveNormal(MoveType move, List<int> posStart, List<int> posEnd) {
+    if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
+      return 1; // 보드 외부에 이동 시도
+    }
+    else if(move == MoveType.n || move == MoveType.c || move == MoveType.p2 || move == MoveType.ep){
+      Pieces startPiece = boardState[posStart[1]][posStart[0]];
+      boardState[posEnd[1]][posEnd[0]] = startPiece;
+      boardState[posStart[1]][posStart[0]] = Pieces.nX;
+
+      if(move == MoveType.p2){
+        epFile = posEnd[0];
+      }
+      else{
+        epFile = -1;
+        if(move == MoveType.ep){
+          boardState[posStart[1] - fw()][posStart[0]] = Pieces.nX;
+        }
+      }
+
+      if(turnPass() != 0){
+        return 3; // 잘못된 플레이어 턴
+      }
+      return 0;
+    }
+    else{
+      return 2; // 올바르지 않은 이동코드
+    }
+  }
+
+  // 프로모션할 기물, 이동 시작과 끝 좌표를 받아 이동 후 프로모션 처리 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
+  int movePromote(Pieces piece, List<int> posStart, List<int> posEnd) {
+    if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
+      return 1; // 보드 외부에 이동 시도
+    }
+    else{
+      boardState[posEnd[1]][posEnd[0]] = piece;
+      boardState[posStart[1]][posStart[0]] = Pieces.nX;
+
+      epFile = -1;
+      if(turnPass() != 0){
+        return 3; // 잘못된 플레이어 턴
+      }
+      return 0;
+    }
+  }
+
+  // 캐슬링 타입 받고 실제로 캐슬링 처리 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
+  int moveCastle(CastleType castle) {
+    if(castle == CastleType.wK){
+      Pieces rookiePiece = boardState[boardSize[1] - 1][7];
+      boardState[boardSize[1] - 1][4] = Pieces.nX;
+      boardState[boardSize[1] - 1][7] = Pieces.nX;
+      boardState[boardSize[1] - 1][5] = rookiePiece;
+      boardState[boardSize[1] - 1][6] = Pieces.wK;
+    }
+    else if(castle == CastleType.wQ){
+      Pieces rookiePiece = boardState[0][0];
+      boardState[boardSize[1] - 1][4] = Pieces.nX;
+      boardState[boardSize[1] - 1][0] = Pieces.nX;
+      boardState[boardSize[1] - 1][3] = rookiePiece;
+      boardState[boardSize[1] - 1][2] = Pieces.bK;
+    }
+    else if(castle == CastleType.bK){
+      Pieces rookiePiece = boardState[0][7];
+      boardState[0][4] = Pieces.nX;
+      boardState[0][7] = Pieces.nX;
+      boardState[0][5] = rookiePiece;
+      boardState[0][6] = Pieces.bK;
+    }
+    else if(castle == CastleType.bQ){
+      Pieces rookiePiece = boardState[0][0];
+      boardState[0][4] = Pieces.nX;
+      boardState[0][0] = Pieces.nX;
+      boardState[0][3] = rookiePiece;
+      boardState[0][2] = Pieces.bK;
+    }
+    else{
+      return 2; // 올바르지 않은 캐슬링 종류
+    }
+
+    epFile = -1;
+    if(turnPass() != 0){
+      return 3; // 잘못된 플레이어 턴
+    }
+    return 0;
+  }
+
 ///////////////////////////////////
   late int kingposy;
   late int kingposx;
