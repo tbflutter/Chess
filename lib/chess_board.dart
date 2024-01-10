@@ -56,14 +56,15 @@ class ChessBoard {
   }
 
   Map<Pieces, int> getPieceCount() { // 보드의 기물 수를 각각 세어주는 함수
-    Map<Pieces,int> pieceCount = {
-      Pieces.nX : 0,
-      Pieces.wP : 0, Pieces.wN : 0, Pieces.wB : 0, Pieces.wR : 0, Pieces.wQ : 0, Pieces.wK : 0,
-      Pieces.bP : 0, Pieces.bN : 0, Pieces.bB : 0, Pieces.bR : 0, Pieces.bQ : 0, Pieces.bK : 0,
-    };
+    List<String> pieceList = Pieces.values.map((e) => e.name).toList();
+    Map<Pieces,int> pieceCount = {};
+    for (String p in pieceList) {
+      pieceCount[Pieces.values.byName(p)] = 0;
+    }
+
     for (int i = 0; i < boardSize[1]; i++) {
       for (int j = 0; j < boardSize[0]; j++) {
-        int temp = pieceCount[boardState[i][j]]!;
+        int temp = pieceCount[boardState[i][j]] ?? 0;
         temp++;
         pieceCount[boardState[i][j]] = temp;
       }
