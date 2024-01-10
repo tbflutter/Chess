@@ -335,7 +335,7 @@ class ChessBoard {
         return 0;
       case Player.n:
         return 3; // 잘못된 플레이어 턴
-    }git a
+    }
   }
 
   // 이동코드, 이동 시작과 끝 좌표를 받아 이동 처리 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
@@ -434,7 +434,8 @@ class ChessBoard {
   List<int> KingPos(List<List<Pieces>> boardState) {
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
-        if (boardState[i][j].pieceType == PieceType.K) {
+        if (boardState[i][j].pieceType == PieceType.K
+            && boardState[i][j].controller == lastPlayer) {
           kingposx = j;
           kingposy = i;
           return [i, j];
@@ -444,7 +445,7 @@ class ChessBoard {
     return [-1, -1]; // null 오류 방지
   }
 
-  bool isChecked(List<List<Pieces>> boardState) {
+  bool isChecked(List<List<Pieces>> boardState) {// 현재 보드를 주면 체크 여부를 반환하는 함수
     List<int> pos = KingPos(boardState); //킹의 좌표 중심 생각
     final KingPlayer = boardState[pos[1]][pos[0]].controller;//판단 대상 킹의 주인을 변수로 불러옴
     late var CheckCo; //로직에서 체크하는 좌표를 담은 변수로 사용함
@@ -593,6 +594,35 @@ class ChessBoard {
         return true;
       } else {}
     }//폰 확인 종료
+    return false;
+  }
+
+  bool isCheckMate(List<List<Pieces>> boardState, Player Player){
+    for (int x = 0; x < 8; x++) {
+      for (int y = 0; y < 8; y++) {
+        if (boardState[y][x].controller == lastPlayer){
+          List<List<MoveType>> possibleMove = moveCalc([x, y]);
+          for (int a = 0; a < 8; a++){
+            for (int b = 0; b < 8; b++){
+              if (possibleMove[a][b] != MoveType.x){
+                List<List<Pieces>> ifBoardState = boardState;
+                ifBoardState[a][b] = boardState[y][x];
+                ifBoardState[y][x] = Pieces.nX;
+                if (isChecked(ifBoardState)){
+                  return true;
+                } else {
+                  continue;
+                }
+              } else {
+                continue;
+              }
+            }
+          }//이동 가능한 경우의 수 하나씩 검사 for 문
+        } else {
+          continue;
+        }
+      }
+    }//현재 상황 보드 한 칸씩 검사 for 문
     return false;
   }
 }
