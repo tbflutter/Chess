@@ -24,20 +24,30 @@ enum PieceType { // 없음, 폰, 나이트, 비숍, 룩, 퀸, 킹
 enum MoveType { // 이동불가, 일반이동, 잡는이동, 캐슬링 이동, 폰 초기 2칸 전진,
   x, n, c, ca, p2, pm, cpm, ep // 폰 이동 후 프로모션, 폰 잡기 후 프로모션, 앙파상
 }
-enum CastleType {
-  wK, wQ, bK, bQ, // 캐슬링(백 킹사이드, 백 퀸사이드, 흑 킹사이드, 흑 퀸사이드)
+enum CastleType { // 캐슬링(백 킹사이드, 백 퀸사이드, 흑 킹사이드, 흑 퀸사이드)
+  wK, wQ, bK, bQ,
+}
+enum CellColor { // 보드 칸의 색: 흰색, 검은색
+  white, black,
 }
 
 class ChessBoard {
   static final List<int> boardSize = [8,8]; //가로, 세로
   late List<List<Pieces>> boardState; //기물 위치
-  List<List<Pieces>> boardCopy() => List.generate(boardSize[1], (i) => List.from(boardState[i]));//기물 위치의 복사본
+  List<List<List<Pieces>>> boardHistory = [];
   int epFile = -1; // 앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
   int drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수, 75가 되면 무승부
   late Map<CastleType,bool> isCastleAble; // 캐슬링 가능 여부
-  Player lastPlayer = Player.w; //현재 턴인 사람
-  int fw() => (lastPlayer == Player.w ? -1 : 1); // 폰이 이동하는 방향
-  int pmRank() => (lastPlayer == Player.w ? 0 : boardSize[1] - 1); //폰이 프로모션하는 랭크(세로 좌표)
+  late Player lastPlayer; //현재 턴인 사람
+
+  //기물 위치의 복사본
+  List<List<Pieces>> boardCopy() => List.generate(boardSize[1], (i) => List.from(boardState[i]));
+  // 폰이 이동하는 방향
+  int fw() => (lastPlayer == Player.w ? -1 : 1);
+  //폰이 프로모션하는 랭크(세로 좌표)
+  int pmRank() => (lastPlayer == Player.w ? 0 : boardSize[1] - 1);
+  // 칸 위치를 받아 칸의 색을 리턴하는 함수
+  CellColor getCellColor(List<int> pos) => ((pos[0] + pos[1]) % 2 == 0 ? CellColor.black : CellColor.white);
 
   void initBoard() { //보드 초기화
     boardState = [
@@ -56,6 +66,7 @@ class ChessBoard {
       CastleType.bK : true,
       CastleType.bQ : true,
     }; // 모든 캐슬링(백킹, 백퀸, 흑킹, 흑퀸) 가능으로 설정
+    lastPlayer = Player.w; // 흰색 먼저 시작
   }
 
   Map<Pieces, int> getPieceCount() { // 보드의 기물 수를 각각 세어주는 함수
@@ -73,6 +84,96 @@ class ChessBoard {
       }
     }
     return pieceCount;
+  }
+
+  // 각 플레이어가 상대를 체크메이트 시킬수 있는 기물을 가지고 있는지 확인하는 함수
+  Map<Player, bool> isInsufficientPiece(){
+    List<String> playerList = Player.values.map((e) => e.name).toList();
+    Map<Pieces,int> pieceCount = getPieceCount();
+    Map<Player, bool> isInsufficientPiece = {};
+    for (String p in playerList) { // p: 플레이어
+      Player player = Player.values.byName(p);
+      // 킹 없음(유효X) -> 불충분 / 킹 + 퀸/룩/폰 -> 충분
+      if(pieceCount[Pieces.getPiece(player, PieceType.K)]! <= 0) {
+        isInsufficientPiece[player] = true;
+      }
+      else if(pieceCount[Pieces.getPiece(player, PieceType.P)]! > 0) {
+        isInsufficientPiece[player] = false;
+      }
+      else if(pieceCount[Pieces.getPiece(player, PieceType.Q)]! > 0) {
+        isInsufficientPiece[player] = false;
+      }
+      else if(pieceCount[Pieces.getPiece(player, PieceType.R)]! > 0) {
+        isInsufficientPiece[player] = false;
+      }
+
+      if(pieceCount[Pieces.getPiece(player, PieceType.N)]! > 0){ // 나이트 있음
+        if(pieceCount[Pieces.getPiece(player, PieceType.B)]! > 0){
+          // 킹 + 비숍 + 나이트 -> 충분
+          isInsufficientPiece[player] = false;
+        }
+        else if(pieceCount[Pieces.getPiece(player, PieceType.N)]! >= 2){
+          //킹 + 나이트x2 -> 충분
+          isInsufficientPiece[player] = false;
+        }
+        else{
+          for (String opp in playerList) { // opp: 상대 플레이어
+            Player opponent = Player.values.byName(opp);
+            if(player == opponent) continue;
+            //킹 + 나이트 vs 킹 + 룩/비숍/나이트/폰 -> 충분
+            if(pieceCount[Pieces.getPiece(opponent, PieceType.P)]! > 0) {
+              isInsufficientPiece[player] = false;
+            }
+            else if(pieceCount[Pieces.getPiece(opponent, PieceType.R)]! > 0) {
+              isInsufficientPiece[player] = false;
+            }
+            else if(pieceCount[Pieces.getPiece(opponent, PieceType.B)]! > 0) {
+              isInsufficientPiece[player] = false;
+            }
+            else if(pieceCount[Pieces.getPiece(opponent, PieceType.N)]! > 0) {
+              isInsufficientPiece[player] = false;
+            }
+          }
+        }
+      }
+      else if(pieceCount[Pieces.getPiece(player, PieceType.B)]! > 0){ // 나이트 없고 비숍 있음
+        // 색이 다른 비숍 있는지 확인
+        CellColor? color;
+        bool isDoubleBishop = false;
+        for (int i = 0; i < boardSize[1]; i++) {
+          for (int j = 0; j < boardSize[0]; j++) {
+            if(boardState[i][j].pieceType == PieceType.B){
+              if(color == null){
+                color = getCellColor([i, j]);
+              }
+              else if(color != getCellColor([i, j])){
+                isDoubleBishop = true;
+              }
+            }
+          }
+        }
+
+        if(isDoubleBishop){ // 킹 + 색이 다른 두 비숍 or 킹 + 비숍 vs 킹 + 색이 다른 비숍 -> 충분
+          isInsufficientPiece[player] = false;
+        }
+        else{
+          for (String opp in playerList) { // opp: 상대 플레이어
+            Player opponent = Player.values.byName(opp);
+            if(player == opponent) continue;
+            //킹 + 비숍 vs 킹 + 나이트/폰 -> 충분
+            if(pieceCount[Pieces.getPiece(opponent, PieceType.P)]! > 0) {
+              isInsufficientPiece[player] = false;
+            }
+            else if(pieceCount[Pieces.getPiece(opponent, PieceType.N)]! > 0) {
+              isInsufficientPiece[player] = false;
+            }
+          }
+        }
+      }
+      // 나머지 경우 -> 불충분
+      isInsufficientPiece[player] = isInsufficientPiece[player] ?? true;
+    }
+    return isInsufficientPiece;
   }
 
   // posStart(시작좌표), posEnd (끝좌표)를 받아 시작좌표의 기물이 끝좌표로 이동할때의 이동 방식을 리턴
@@ -135,7 +236,7 @@ class ChessBoard {
             if(boardState[pos[1] + fw()][pos[0] - 1].pieceType != PieceType.X) {
               tempMove[pos[1] + fw()][pos[0] - 1] = findMoveType(pos, [pos[0] - 1, pos[1] + fw()]);
             }
-            if(epFile == pos[0] - 1 && pos[0] == epRank){ // 앙파상 왼쪽
+            else if(epFile == pos[0] - 1 && pos[1] == epRank){ // 앙파상 왼쪽
               List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
 
@@ -151,7 +252,7 @@ class ChessBoard {
             if(boardState[pos[1] + fw()][pos[0] + 1].pieceType != PieceType.X) {
               tempMove[pos[1] + fw()][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1] + fw()]);
             }
-            if(epFile == pos[0] + 1 && pos[0] == epRank){ // 앙파상 오른쪽
+            else if(epFile == pos[0] + 1 && pos[1] == epRank){ // 앙파상 오른쪽
               List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
 
@@ -309,7 +410,7 @@ class ChessBoard {
 
           if(isCastleAble[lastPlayer == Player.w ? CastleType.wK : CastleType.bK] ?? false){ // 킹사이드 캐슬링
             if(boardState[pos[1]][pos[0] + 1].pieceType == PieceType.X
-                || boardState[pos[1]][pos[0] + 2].pieceType == PieceType.X){
+                && boardState[pos[1]][pos[0] + 2].pieceType == PieceType.X){
               List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
               bool castleAble = true;
@@ -326,8 +427,8 @@ class ChessBoard {
           }
           if(isCastleAble[lastPlayer == Player.w ? CastleType.wQ : CastleType.bQ] ?? false){ // 퀸사이드 캐슬링
             if(boardState[pos[1]][pos[0] - 1].pieceType == PieceType.X
-                || boardState[pos[1]][pos[0] - 2].pieceType == PieceType.X
-                || boardState[pos[1]][pos[0] - 3].pieceType == PieceType.X){
+                && boardState[pos[1]][pos[0] - 2].pieceType == PieceType.X
+                && boardState[pos[1]][pos[0] - 3].pieceType == PieceType.X){
               List<List<Pieces>> tempBoardState = boardCopy();
               Pieces tempPiece = tempBoardState[pos[1]][pos[0]];
               bool castleAble = true;
@@ -419,13 +520,15 @@ class ChessBoard {
       else{
         epFile = -1;
         if(move == MoveType.ep){
-          boardState[posStart[1] - fw()][posStart[0]] = Pieces.nX;
+          boardState[posEnd[1] - fw()][posEnd[0]] = Pieces.nX;
         }
       }
       if(startPiece.pieceType == PieceType.P || move == MoveType.c){
+        boardHistory = [];
         drawClock = 0;
       }
       else if(lastPlayer == Player.b){
+        boardHistory.add(boardState);
         drawClock++;
       }
 
@@ -449,6 +552,7 @@ class ChessBoard {
       boardState[posStart[1]][posStart[0]] = Pieces.nX;
 
       epFile = -1;
+      boardHistory = [];
       drawClock = 0;
       if(turnPass() != 0){
         return 3; // 잘못된 플레이어 턴
@@ -492,6 +596,7 @@ class ChessBoard {
     }
 
     epFile = -1;
+    boardHistory = [];
     drawClock = 0;
     if(turnPass() != 0){
       return 3; // 잘못된 플레이어 턴
@@ -522,7 +627,8 @@ class ChessBoard {
     final KingPlayer = boardState[pos[1]][pos[0]].controller;//판단 대상 킹의 주인을 변수로 불러옴
     late var CheckCo; //로직에서 체크하는 좌표를 담은 변수로 사용함
     //----1. 룩에 의한 체크 위협 상황 여부 판별----
-    for (int i = 1; i < 8; i++) {
+    for (int i = 1; i < boardSize[1]; i++) {
+      if(pos[1] - i <= -1) break;
       CheckCo = boardState[pos[1] - i][pos[0]];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
@@ -532,7 +638,8 @@ class ChessBoard {
         continue;
       }
     } // 아래로 확인
-    for (int i = 1; i < 8; i++) {
+    for (int i = 1; i < boardSize[1]; i++) {
+      if(pos[1] + i >= boardSize[1]) break;
       CheckCo = boardState[pos[1] + i][pos[0]];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
@@ -542,7 +649,8 @@ class ChessBoard {
         continue;
       }
     } // 위로 확인
-    for (int i = 1; i < 8; i++) {
+    for (int i = 1; i < boardSize[0]; i++) {
+      if(pos[0] - i <= -1) break;
       CheckCo = boardState[pos[1]][pos[0] - i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
@@ -552,7 +660,8 @@ class ChessBoard {
         continue;
       }
     } // 좌로 확인
-    for (int i = 1; i < 8; i++) {
+    for (int i = 1; i < boardSize[0]; i++) {
+      if(pos[0] + i >= boardSize[0]) break;
       CheckCo = boardState[pos[1]][pos[0] + i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
@@ -564,6 +673,7 @@ class ChessBoard {
     } // 우로 확인, 룩 확인 종료
     //----2. 비숍에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < 8; i++) {
+      if(pos[1] - i <= -1 || pos[0] - i <= -1) break;
       CheckCo = boardState[pos[1] - i][pos[0] - i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
@@ -574,6 +684,7 @@ class ChessBoard {
       }
     } // 좌측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
+      if(pos[1] + i >= boardSize[1] || pos[0] - i <= -1) break;
       CheckCo = boardState[pos[1] + i][pos[0] - i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
@@ -584,6 +695,7 @@ class ChessBoard {
       }
     } // 좌측 위 대각선 확인
     for (int i = 1; i < 8; i++) {
+      if(pos[1] - i <= -1 || pos[0] + i >= boardSize[0]) break;
       CheckCo = boardState[pos[1] - i][pos[0] + i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
@@ -594,6 +706,7 @@ class ChessBoard {
       }
     } // 우측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
+      if(pos[1] + i >= boardSize[1] || pos[0] + i >= boardSize[0]) break;
       CheckCo = boardState[pos[1] + i][pos[0] + i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
@@ -669,32 +782,48 @@ class ChessBoard {
     return false;
   }
 
-  bool isCheckMate(List<List<Pieces>> boardState, Player Player){
+  bool isCannotEscape(List<List<Pieces>> boardState, Player Player){//스스로 패배하지 않는 다음 수가 있는지 검사하는 함수
     for (int x = 0; x < 8; x++) {
       for (int y = 0; y < 8; y++) {
         if (boardState[y][x].controller == lastPlayer){
           List<List<MoveType>> possibleMove = moveCalc([x, y]);
           for (int a = 0; a < 8; a++){
             for (int b = 0; b < 8; b++){
-              if (possibleMove[a][b] != MoveType.x){
-                List<List<Pieces>> ifBoardState = boardState;
-                ifBoardState[a][b] = boardState[y][x];
+              if (possibleMove[a][b] != MoveType.x){ //가능한 이동 경우인지
+                List<List<Pieces>> ifBoardState = boardCopy();
+                ifBoardState[a][b] = boardCopy()[y][x];
                 ifBoardState[y][x] = Pieces.nX;
                 if (isChecked(ifBoardState)){
-                  continue;
+                  continue; // 체크인 경우라면 계속 다음 케이스 탐색
                 } else {
-                  return false;
+                  return false; //이동시 체크 벗어나는 한 경우라도 있다면 false
                 }
               } else {
-                continue;
+                continue; //이동 자체가 안된다면 계속 다음 케이스 탐색
               }
             }
           }//이동 가능한 경우의 수 하나씩 검사 for 문
         } else {
-          continue;
+          continue; //플레이어가 안 맞으면 다음 케이스 탐색
         }
       }
     }//현재 상황 보드 한 칸씩 검사 for 문
-    return true;
+    return true; //모든 경우를 돈 후 체크를 벗어나는 경우가 없다면 true
+  }
+
+  bool isCheckMate(List<List<Pieces>> boardState, Player Player){//체크메이트 판단 함수
+    if (isChecked(boardState) && isCannotEscape(boardState, Player)){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool isStaleMate(List<List<Pieces>> boardState, Player Player){//스테일메이트 판단 함수
+    if (!isChecked(boardState) && isCannotEscape(boardState, Player)){
+      return true;
+    } else {
+      return false;
+    }
   }
 }
