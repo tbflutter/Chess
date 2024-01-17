@@ -10,30 +10,45 @@ class DuringGame extends StatefulWidget {
 }
 
 Board board = Board();
-ChessBoard _backBoard = ChessBoard();
 Piece? selectedPiece;
+Color turnPlayer = Colors.white;
+ChessBoard _backBoard = ChessBoard();
 BoardCommunication communicator = BoardCommunication.init(board, _backBoard);
+
+void changeTurnPlayer() {
+  if (turnPlayer == Colors.white) {
+    turnPlayer = Colors.black;
+  } else {
+    turnPlayer = Colors.white;
+  }
+}
+
+late dynamic setState;
 
 class _DuringGameState extends State<DuringGame> {
   @override
   void initState() {
-    board.init(setState);
+    setState = this.setState;
+    board.init();
     _backBoard.initBoard();
     communicator.syncBoard(MoveType.x);
   }
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+
+    TurnPlayerDisplay turnPlayerDisplay = TurnPlayerDisplay();
+
+    List<Widget> userInterfaces = [turnPlayerDisplay.build(context), SizedBox(height: size.height - turnPlayerDisplay.size.height, child: board.build(context))];
+
     return MaterialApp(
       home: PopScope(
         canPop: false,
         onPopInvoked: (value) {},
         child: Scaffold(
-          body: board.build(context),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              print("d");
-            },
+          body: Column(
+            children: userInterfaces,
           ),
         ),
       ),
@@ -43,18 +58,13 @@ class _DuringGameState extends State<DuringGame> {
 
 class Board {
   late List<Cell> _rawCells;
-  late dynamic setState;
 
-  void init(setState) {
-    this.setState = setState;
-
+  void init() {
     _rawCells = List.generate(8 * 8, (index) {
       Color color = (index + index ~/ 8) % 2 == 0 ? Colors.white : Colors.black;
 
-      return Cell(color, setState, Position._set_index(index));
+      return Cell(color, Position._setIndex(index));
     });
-
-    setPiece(Position("a2"), Pawn(Colors.white));
   }
 
   Widget build(BuildContext context) {
@@ -77,10 +87,6 @@ class Board {
 
   Cell getCell(Position position) {
     return _rawCells[position._index];
-  }
-
-  Piece? getPiece(Position position) {
-    return getCell(position).piece;
   }
 
   void setPiece(Position position, Piece? piece) {
@@ -137,7 +143,7 @@ class Position {
     }
   }
 
-  Position._set_index(this._index) {
+  Position._setIndex(this._index) {
     alphanumeric = "";
 
     switch (_index % 8) {
@@ -181,8 +187,6 @@ class Position {
 }
 
 class Piece {
-  late String imageDirectory;
-  late AssetImage targetImage;
   late Widget body;
   late Position position;
   late Color color;
@@ -191,11 +195,17 @@ class Piece {
     body = GestureDetector(
       onTap: () {
         if (selectedPiece != null) {
-          communicator.sendMovingRequest(
-              selectedPiece!, selectedPiece!.position, this.position);
+          setState(() {
+            board.getCell(selectedPiece!.position).isSelected = false;
+          });
+
+          communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, this.position);
           selectedPiece = null;
         } else {
-          selectedPiece = this;
+          setState(() {
+            selectedPiece = this;
+            board.getCell(position).isSelected = true;
+          });
         }
       },
       child: child,
@@ -204,93 +214,51 @@ class Piece {
     return body;
   }
 
-  Piece(this.color) {
-    imageDirectory =
-        color == Colors.white ? "assets/pieces/white" : "assets/pieces/black";
-  }
+  Piece(this.color, String lowerImageDirectory) {
+    String upperImageDirectory = color == Colors.white ? "assets/pieces/white/" : "assets/pieces/black/";
+    AssetImage targetImage = AssetImage("$upperImageDirectory$lowerImageDirectory");
 
-/*
-    if (canPieceMove(this, departure, destination)) {
-      // Move
-      board.setPiece(departure, null);
-      board.setPiece(destination, this);
-    } else {
-      selectedPiece = null;
-    }
-    */
+    setBody(
+      Image(image: targetImage),
+    );
+  }
 }
 
 class Pawn extends Piece {
-  Pawn(super.color) {
-    AssetImage targetImage = AssetImage("${super.imageDirectory}/pawn.png");
-
-    setBody(
-      Image(image: targetImage),
-    );
-  }
+  Pawn(Color color) : super(color, 'pawn.png');
 }
 
 class Bishop extends Piece {
-  Bishop(super.imageDirectory) {
-    AssetImage targetImage = AssetImage("$imageDirectory/bishop.png");
-
-    setBody(
-      Image(image: targetImage),
-    );
-  }
+  Bishop(Color color) : super(color, 'bishop.png');
 }
 
 class Knight extends Piece {
-  Knight(super.imageDirectory) {
-    AssetImage targetImage = AssetImage("$imageDirectory/knight.png");
-
-    setBody(
-      Image(image: targetImage),
-    );
-  }
+  Knight(Color color) : super(color, 'knight.png');
 }
 
 class Rook extends Piece {
   bool hasMoved = false;
 
-  Rook(super.imageDirectory) {
-    AssetImage targetImage = AssetImage("$imageDirectory/rook.png");
-
-    setBody(
-      Image(image: targetImage),
-    );
-  }
+  Rook(Color color) : super(color, 'rook.png');
 }
 
 class Queen extends Piece {
-  Queen(super.imageDirectory) {
-    AssetImage targetImage = AssetImage("$imageDirectory/queen.png");
-
-    setBody(
-      Image(image: targetImage),
-    );
-  }
+  Queen(Color color) : super(color, 'queen.png');
 }
 
 class King extends Piece {
   bool hasMoved = false;
 
-  King(super.imageDirectory) {
-    AssetImage targetImage = AssetImage("$imageDirectory/king.png");
-
-    setBody(
-      Image(image: targetImage),
-    );
-  }
+  King(Color color) : super(color, 'king.png');
 }
 
 class Cell {
   late Color color;
-  late dynamic setState;
   late Position position;
+  bool isSelected = false;
   Piece? piece;
 
-  Cell(this.color, this.setState, this.position);
+  Cell(this.color, this.position);
 
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -300,14 +268,15 @@ class Cell {
         onTap: () {
           setState(() {
             if (selectedPiece != null) {
-              communicator.sendMovingRequest(
-                  selectedPiece!, selectedPiece!.position, this.position);
+              board.getCell(selectedPiece!.position).isSelected = false;
+
+              communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, this.position);
               selectedPiece = null;
             }
           });
         },
         child: Container(
-          color: color,
+          color: (isSelected) ? addGreen(color) : color,
           child: SizedBox(
             width: size.width * 0.15,
             height: size.width * 0.15,
@@ -316,5 +285,99 @@ class Cell {
         ),
       ),
     );
+  }
+}
+
+class TurnPlayerDisplay {
+  late Size size;
+
+  Widget build(BuildContext context) {
+    Size contextSize = MediaQuery.of(context).size;
+    double width = contextSize.width * 0.90;
+    double height = contextSize.height * 0.10;
+    size = Size(width, height);
+
+    return Center(
+      child: SizedBox(
+        height: height,
+        child: Row(
+          children: [
+            _buildLeftTurnPlayerDisplay(context),
+            _buildRightTurnPlayerDisplay(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLeftTurnPlayerDisplay(BuildContext context) {
+    LeftTurnPlayerDisplayPainter leftTurnPlayerDisplayPainter = LeftTurnPlayerDisplayPainter();
+    return CustomPaint(painter: leftTurnPlayerDisplayPainter, size: size / 2);
+  }
+
+  Widget _buildRightTurnPlayerDisplay(BuildContext context) {
+    RightTurnPlayerDisplayPainter rightTurnPlayerDisplayPainter = RightTurnPlayerDisplayPainter();
+    return CustomPaint(painter: rightTurnPlayerDisplayPainter, size: size / 2);
+  }
+}
+
+class LeftTurnPlayerDisplayPainter extends CustomPainter {
+  const LeftTurnPlayerDisplayPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()..color = (turnPlayer == Colors.white) ? Colors.white : Colors.grey;
+
+    double x = size.width;
+    double y = size.height;
+    Path path = Path()
+      ..moveTo(0 * x, 0 * y)
+      ..lineTo(0 * x, 1 * y)
+      ..lineTo(1 * x, 1 * y)
+      ..lineTo(1 * x - 1 * y, 0 * y)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+class RightTurnPlayerDisplayPainter extends CustomPainter {
+  const RightTurnPlayerDisplayPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()..color = (turnPlayer == Colors.black) ? Colors.black : Colors.grey;
+
+    double x = size.width;
+    double y = size.height;
+    Path path = Path()
+      ..moveTo(0 * x, 0 * y)
+      ..lineTo(0 * x + 1 * y, 1 * y)
+      ..lineTo(1 * x, 1 * y)
+      ..lineTo(1 * x, 0 * y)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+const greenWhite = Color(0xFFDDFFDD);
+const greenBlack = Color(0xFF004400);
+
+Color addGreen(Color color) {
+  if (color == Colors.white) {
+    return greenWhite;
+  } else {
+    return greenBlack;
   }
 }

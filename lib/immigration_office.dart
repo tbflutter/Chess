@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'duringGame.dart';
+import 'during_game.dart';
 import 'chess_board.dart';
 
 class BoardCommunication {

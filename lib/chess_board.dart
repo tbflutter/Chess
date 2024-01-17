@@ -1,4 +1,4 @@
-import 'duringGame.dart';
+import 'during_game.dart';
 
 enum Pieces { // 기물 목록
   nX(Player.n, PieceType.X),

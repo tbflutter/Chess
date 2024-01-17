@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'duringGame.dart';
+import 'during_game.dart';
 
 void main() {
   runApp(const MyApp());
@@ -44,9 +44,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -58,35 +55,16 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          Navigator.push(
-              context,
-              PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const DuringGame(),
-                  transitionDuration: const Duration(seconds: 0),
-                  transitionsBuilder: (_, o, __, c) =>
-                      FadeTransition(opacity: o, child: c)));
+          Navigator.push(context, PageRouteBuilder(pageBuilder: (_, __, ___) => const DuringGame(), transitionDuration: const Duration(seconds: 0), transitionsBuilder: (_, o, __, c) => FadeTransition(opacity: o, child: c)));
         },
         child: const Center(
-            // Center is a layout widget. It takes a single child and positions it
-            // in the middle of the parent.
-            // child: InkWell(
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          // child: InkWell(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.max, children: [
               Image(image: AssetImage("assets/a.png")),
             ])),
       ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.exposure_minus_1),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
-
-
-// TODO: Delete Screen Changing Effect
-// TODO: Expand Touch Detecting Range
