@@ -322,7 +322,11 @@ class LeftTurnPlayerDisplayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()..color = (turnPlayer == Colors.white) ? Colors.white : Colors.grey;
+    Paint paint = Paint()..color = Colors.white;
+    Paint paintBorder = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = (turnPlayer == Colors.white) ? 7.0 : 3.0
+      ..color = Colors.blue;
 
     double x = size.width;
     double y = size.height;
@@ -334,6 +338,7 @@ class LeftTurnPlayerDisplayPainter extends CustomPainter {
       ..close();
 
     canvas.drawPath(path, paint);
+    canvas.drawPath(path, paintBorder);
   }
 
   @override
@@ -347,7 +352,11 @@ class RightTurnPlayerDisplayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()..color = (turnPlayer == Colors.black) ? Colors.black : Colors.grey;
+    Paint paint = Paint()..color = Colors.black;
+    Paint paintBorder = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = (turnPlayer == Colors.black) ? 7.0 : 3.0
+      ..color = Colors.blue;
 
     double x = size.width;
     double y = size.height;
@@ -359,6 +368,7 @@ class RightTurnPlayerDisplayPainter extends CustomPainter {
       ..close();
 
     canvas.drawPath(path, paint);
+    canvas.drawPath(path, paintBorder);
   }
 
   @override
