@@ -15,12 +15,8 @@ Color turnPlayer = Colors.white;
 ChessBoard _backBoard = ChessBoard();
 BoardCommunication communicator = BoardCommunication.init(board, _backBoard);
 
-void changeTurnPlayer() {
-  if (turnPlayer == Colors.white) {
-    turnPlayer = Colors.black;
-  } else {
-    turnPlayer = Colors.white;
-  }
+void syncTurnPlayer(Color player) {
+  turnPlayer = player;
 }
 
 late dynamic setState;
@@ -201,7 +197,7 @@ class Piece {
 
           communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, this.position);
           selectedPiece = null;
-        } else {
+        } else if (turnPlayer == this.color) {
           setState(() {
             selectedPiece = this;
             board.getCell(position).isSelected = true;

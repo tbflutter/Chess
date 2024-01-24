@@ -34,6 +34,8 @@ class BoardCommunication {
         frontBoard.setPiece(position, piece);
       }
     }
+
+    syncTurnPlayer(Translate.backPlayer_to_frontPlayer(communicator.backBoard.lastPlayer));
   }
 }
 
@@ -103,5 +105,12 @@ class Translate {
     }
   }
 
+  static Color backPlayer_to_frontPlayer(Player player) {
+    if (player == Player.w) {
+      return Colors.white;
+    } else {
+      return Colors.black;
+    }
+  }
 }
 
