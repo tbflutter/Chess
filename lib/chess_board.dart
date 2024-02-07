@@ -696,7 +696,7 @@ class ChessBoard {
             && boardState[i][j].controller == lastPlayer) {
           kingposx = j;
           kingposy = i;
-          return [i, j];
+          return [j, i];
         } else {}
       }
     }
@@ -709,7 +709,7 @@ class ChessBoard {
     late var CheckCo; //로직에서 체크하는 좌표를 담은 변수로 사용함
     //----1. 룩에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < boardSize[1]; i++) {
-      if(pos[1] - i <= -1) break;
+      if(pos[1] - i < 0) break;
       CheckCo = boardState[pos[1] - i][pos[0]];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
@@ -730,8 +730,8 @@ class ChessBoard {
         continue;
       }
     } // 위로 확인
-    for (int i = 1; i < boardSize[0]; i++) {
-      if(pos[0] - i <= -1) break;
+    for (int i = 1; i <= boardSize[0]; i++) {
+      if(pos[0] - i < 0) break;
       CheckCo = boardState[pos[1]][pos[0] - i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
@@ -754,7 +754,7 @@ class ChessBoard {
     } // 우로 확인, 룩 확인 종료
     //----2. 비숍에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < 8; i++) {
-      if(pos[1] - i <= -1 || pos[0] - i <= -1) break;
+      if(pos[1] - i < 0 || pos[0] - i < 0) break;
       CheckCo = boardState[pos[1] - i][pos[0] - i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
@@ -765,7 +765,7 @@ class ChessBoard {
       }
     } // 좌측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
-      if(pos[1] + i >= boardSize[1] || pos[0] - i <= -1) break;
+      if(pos[1] + i >= boardSize[1] || pos[0] - i < 0) break;
       CheckCo = boardState[pos[1] + i][pos[0] - i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
@@ -776,7 +776,7 @@ class ChessBoard {
       }
     } // 좌측 위 대각선 확인
     for (int i = 1; i < 8; i++) {
-      if(pos[1] - i <= -1 || pos[0] + i >= boardSize[0]) break;
+      if(pos[1] - i < 0 || pos[0] + i >= boardSize[0]) break;
       CheckCo = boardState[pos[1] - i][pos[0] + i];
       if (CheckCo.pieceType == PieceType.X) {} else
       if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
