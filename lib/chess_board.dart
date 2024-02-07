@@ -516,8 +516,6 @@ class ChessBoard {
     }
   }
 
-  PieceType getPromotePiece() {return PieceType.Q;}
-
   // 두 지점을 입력받아, 이동 처리 후 외부의 syncBoard()함수에 이동코드, 보드상태를 전달하는 함수
   // 프로모션 시에는 외부의 getPromotePiece()함수를 호출 후 처리 (변경가능)
   // 보드 밖을 참조하거나 불가능한 이동 시에는 이동 처리 없이 이동코드 x로 syncBoard()함수에 전달
@@ -554,7 +552,7 @@ class ChessBoard {
       return gameEndChecker();
     }
     else if(move == MoveType.pm || move == MoveType.cpm){
-      Pieces promotePiece = Pieces.getPiece(lastPlayer, getPromotePiece());
+      Pieces promotePiece = Pieces.getPiece(lastPlayer, communicator.getPromotePiece());
       movePromote(promotePiece, posStart, posEnd);
       communicator.syncBoard(move);
       return gameEndChecker();

@@ -50,7 +50,7 @@ class _DuringGameState extends State<DuringGame> {
           body: Column(children: userInterfaces),
           floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.ice_skating),
-            onPressed: () {_dialogBuilder(context);},),
+            onPressed: () {promotionDialogBuilder(context);},),
         ),
       ),
     );
@@ -395,7 +395,7 @@ Color addGreen(Color color) {
 }
 
 // https://api.flutter.dev/flutter/material/showDialog.html
-Future<void> _dialogBuilder(BuildContext context) {
+Future<void> winDialogBuilder(BuildContext context) {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
@@ -412,6 +412,55 @@ Future<void> _dialogBuilder(BuildContext context) {
             child: const Text('Confirm'),
             onPressed: () {
               Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// https://api.flutter.dev/flutter/material/showDialog.html
+Future<void> promotionDialogBuilder(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text("Queen"),
+            onPressed: () {
+              communicator.promotePiece = Queen;
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text("Rook"),
+            onPressed: () {
+              communicator.promotePiece = Rook;
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text("Knight"),
+            onPressed: () {
+              communicator.promotePiece = Knight;
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text("Bishop"),
+            onPressed: () {
+              communicator.promotePiece = Bishop;
             },
           ),
         ],

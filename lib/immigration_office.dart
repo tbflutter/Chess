@@ -5,6 +5,7 @@ import 'chess_board.dart';
 class BoardCommunication {
   late Board frontBoard;
   late ChessBoard backBoard;
+  Type promotePiece = Queen;
 
   BoardCommunication.init(this.frontBoard, this.backBoard);
 
@@ -28,6 +29,10 @@ class BoardCommunication {
     }
 
     syncTurnPlayer(Translate.backPlayer_to_frontPlayer(communicator.backBoard.lastPlayer));
+  }
+
+  PieceType getPromotePiece() {
+    return Translate.frontPieceType_to_backPiecetype(promotePiece);
   }
 }
 
@@ -102,6 +107,20 @@ class Translate {
       return Colors.white;
     } else {
       return Colors.black;
+    }
+  }
+
+  static PieceType frontPieceType_to_backPiecetype(Type pieceType) {
+    if (pieceType == Queen) {
+      return PieceType.Q;
+    } else if (pieceType == Rook) {
+      return PieceType.R;
+    } else if (pieceType == Knight) {
+      return PieceType.N;
+    } else if (pieceType == Bishop) {
+      return PieceType.B;
+    } else {
+      throw "Unexpected piece type";
     }
   }
 }
