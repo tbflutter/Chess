@@ -719,7 +719,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 아래로 확인
     for (int i = 1; i < boardSize[1]; i++) {
@@ -730,7 +730,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 위로 확인
     for (int i = 1; i <= boardSize[0]; i++) {
@@ -741,7 +741,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 좌로 확인
     for (int i = 1; i < boardSize[0]; i++) {
@@ -752,7 +752,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 우로 확인, 룩 확인 종료
     //----2. 비숍에 의한 체크 위협 상황 여부 판별----
@@ -764,7 +764,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 좌측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
@@ -775,7 +775,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 좌측 위 대각선 확인
     for (int i = 1; i < 8; i++) {
@@ -786,7 +786,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 우측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
@@ -797,7 +797,7 @@ class ChessBoard {
           (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
         return true;
       } else {
-        continue;
+        break;
       }
     } // 우측 위 대각선 확인, 비숍 확인 종료
     //----3. 나이트에 의한 체크 위협 상황 여부 판별----
