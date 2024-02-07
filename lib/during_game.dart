@@ -54,6 +54,9 @@ class _DuringGameState extends State<DuringGame> {
               ),
             ],
           ),
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.ice_skating),
+            onPressed: () {_dialogBuilder(context);},),
         ),
       ),
     );
@@ -395,4 +398,30 @@ Color addGreen(Color color) {
   } else {
     return greenBlack;
   }
+}
+
+// https://api.flutter.dev/flutter/material/showDialog.html
+Future<void> _dialogBuilder(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('White Wins!'),
+        content: const Text(
+          'Win by Checkmate',
+        ),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Confirm'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
