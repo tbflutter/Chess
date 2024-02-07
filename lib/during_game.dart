@@ -47,13 +47,7 @@ class _DuringGameState extends State<DuringGame> {
         canPop: false,
         onPopInvoked: (value) {},
         child: Scaffold(
-          body: Stack(
-            children: [
-              Column(
-                children: userInterfaces,
-              ),
-            ],
-          ),
+          body: Column(children: userInterfaces),
           floatingActionButton: FloatingActionButton(
             child: const Icon(Icons.ice_skating),
             onPressed: () {_dialogBuilder(context);},),

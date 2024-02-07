@@ -31,12 +31,52 @@ enum CellColor { // 보드 칸의 색: 흰색, 검은색
   white, black,
 }
 
+// 과거 보드 상태 저장하는 클래스 (3수 동형 판정에 사용)
+class PreviewBoards{
+  List<List<List<Pieces>>> previewBoards = [];
+  List<int> previewBoardsMultiplier = [];
+
+  void clearBoardState(){ // 저장한 상태 지움
+    previewBoards = [];
+    previewBoardsMultiplier = [];
+  }
+
+  // BoardState를 previewBoards에 정렬을 유지하며 삽입
+  void insertBoardState(List<List<Pieces>> boardState){
+    boardSearchLoop:
+    for (int k = 0; k <= previewBoards.length; k++){
+      if(previewBoards.length == k){
+        previewBoards.add(boardState);
+        previewBoardsMultiplier.add(1);
+        break boardSearchLoop;
+      }
+      for (int j = 0; j < ChessBoard.boardSize[1]; j++) {
+        for (int i = 0; i < ChessBoard.boardSize[0]; i++) {
+          if(boardState[j][i].index > previewBoards[k][j][i].index){
+            continue boardSearchLoop;
+          }
+          else if(boardState[j][i].index < previewBoards[k][j][i].index){
+            previewBoards.insert(k, boardState);
+            previewBoardsMultiplier.insert(k, 1);
+            break boardSearchLoop;
+          }
+        }
+      }
+      previewBoardsMultiplier[k]++;
+    }
+  }
+
+  bool isThereThreefoldRepetition()
+  => previewBoardsMultiplier.firstWhere((element) => element >= 3, orElse: () => -1) == -1;
+}
+
+// 체스보드 클래스
 class ChessBoard {
   static final List<int> boardSize = [8,8]; //가로, 세로
   late List<List<Pieces>> boardState; //기물 위치
-  List<List<List<Pieces>>> boardHistory = [];
+  PreviewBoards previewBoards = PreviewBoards();
   int epFile = -1; // 앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
-  int drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수, 75가 되면 무승부
+  int drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수
   late Map<CastleType,bool> isCastleAble; // 캐슬링 가능 여부
   late Player lastPlayer; //현재 턴인 사람
 
@@ -174,6 +214,22 @@ class ChessBoard {
       isInsufficientPiece[player] = isInsufficientPiece[player] ?? true;
     }
     return isInsufficientPiece;
+  }
+
+  // 게임이 끝나지 않았다면 null을 반환
+  // 게임이 끝났고 승부가 났다면 해당 플레이어를 반환
+  // 게임이 끝났고 무승부라면 Player.n을 반환
+  // 주의사항: 턴이 끝난 후 다음 이동 전에 호출해야 함
+  Player? gameEndChecker() {
+    // 체크메이트, 스테일메이트
+    if(isCheckMate(boardState, lastPlayer)) return lastPlayer == Player.w ? Player.b : Player.w;
+    if(isStaleMate(boardState, lastPlayer)) return Player.n;
+    // 50수 무승부, 기물 부족 무승부, 3수 동형 무승부
+    if(drawClock >= 50) return Player.n;
+    if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) return Player.n;
+    if(previewBoards.isThereThreefoldRepetition()) return Player.n;
+    // 게임이 안 끝남
+    return null;
   }
 
   // posStart(시작좌표), posEnd (끝좌표)를 받아 시작좌표의 기물이 끝좌표로 이동할때의 이동 방식을 리턴
@@ -383,25 +439,25 @@ class ChessBoard {
           return tempMove;
 
         case PieceType.K: // 킹일 경우
-          if(pos[0] - 1 >= 0) {
+          if(pos[0] - 1 > -1) {
             tempMove[pos[1]][pos[0] - 1] = findMoveType(pos, [pos[0] - 1, pos[1]]); // 일반 이동
           }
-          if(pos[1] - 1 >= 0) {
+          if(pos[1] - 1 > -1) {
             tempMove[pos[1] - 1][pos[0]] = findMoveType(pos, [pos[0], pos[1] - 1]);
           }
           if(pos[0] + 1 < boardSize[0]) {
             tempMove[pos[1]][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1]]);
           }
-          if(pos[1] + 1 < boardSize[0]) {
+          if(pos[1] + 1 < boardSize[1]) {
             tempMove[pos[1] + 1][pos[0]] = findMoveType(pos, [pos[0], pos[1] + 1]);
           }
-          if(pos[0] - 1 >= 0 && pos[1] - 1 >= 0) {
+          if(pos[0] - 1 > -1 && pos[1] - 1 > -1) {
             tempMove[pos[1] - 1][pos[0] - 1] = findMoveType(pos, [pos[0] - 1, pos[1] - 1]);
           }
-          if(pos[0] - 1 >= 0 && pos[1] + 1 < boardSize[1]) {
+          if(pos[0] - 1 > -1 && pos[1] + 1 < boardSize[1]) {
             tempMove[pos[1] + 1][pos[0] - 1] = findMoveType(pos, [pos[0] - 1, pos[1] + 1]);
           }
-          if(pos[0] + 1 < boardSize[0] && pos[1] - 1 >= 0) {
+          if(pos[0] + 1 < boardSize[0] && pos[1] - 1 > -1) {
             tempMove[pos[1] - 1][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1] - 1]);
           }
           if(pos[0] + 1 < boardSize[0] && pos[1] + 1 < boardSize[1]) {
@@ -456,22 +512,27 @@ class ChessBoard {
   // 두 지점을 입력받아, 이동 처리 후 외부의 syncBoard()함수에 이동코드, 보드상태를 전달하는 함수
   // 프로모션 시에는 외부의 getPromotePiece()함수를 호출 후 처리 (변경가능)
   // 보드 밖을 참조하거나 불가능한 이동 시에는 이동 처리 없이 이동코드 x로 syncBoard()함수에 전달
-  void turnMove(List<int> posStart, List<int> posEnd) {
+  // 이동이 이루어지지 않았다면 null을, 이동이 이루어졌다면 gameEndChecker()를 리턴
+  Player? turnMove(List<int> posStart, List<int> posEnd) {
     if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
       communicator.syncBoard(MoveType.x); // 보드 외부에 이동 시도
+      return null;
     }
     else if(posEnd[0] <= -1 || posEnd[0] >= boardSize[0] || posEnd[1] <= -1 || posEnd[1] >= boardSize[1]){
       communicator.syncBoard(MoveType.x); // 보드 외부에 이동 시도
+      return null;
     }
 
     MoveType move = moveCalc(posStart)[posEnd[1]][posEnd[0]];
 
     if(move == MoveType.x){
       communicator.syncBoard(move); // 불가능한 이동 시도
+      return null;
     }
     else if(move == MoveType.n || move == MoveType.c || move == MoveType.p2 || move == MoveType.ep){
       moveNormal(move, posStart, posEnd);
       communicator.syncBoard(move);
+      return gameEndChecker();
     }
     else if(move == MoveType.ca){
       if(posEnd[0] == posStart[0] + 2){
@@ -481,12 +542,15 @@ class ChessBoard {
         moveCastle(lastPlayer == Player.w ? CastleType.wQ : CastleType.bQ);
       }
       communicator.syncBoard(move);
+      return gameEndChecker();
     }
     else if(move == MoveType.pm || move == MoveType.cpm){
       Pieces promotePiece = Pieces.getPiece(lastPlayer, getPromotePiece());
       movePromote(promotePiece, posStart, posEnd);
       communicator.syncBoard(move);
+      return gameEndChecker();
     }
+    return null;
   }
 
   // 턴을 다음 사람에게 넘긴 후 int 리턴(0이면 정상 처리, 0이 아니면 오류)
@@ -514,6 +578,7 @@ class ChessBoard {
       boardState[posEnd[1]][posEnd[0]] = startPiece;
       boardState[posStart[1]][posStart[0]] = Pieces.nX;
 
+      //이동 후 추가 효과 처리
       if(move == MoveType.p2){
         epFile = posEnd[0];
       }
@@ -522,13 +587,29 @@ class ChessBoard {
         if(move == MoveType.ep){
           boardState[posEnd[1] - fw()][posEnd[0]] = Pieces.nX;
         }
+        else if(startPiece.pieceType == PieceType.K){
+          lastPlayer == Player.w ? isCastleAble[CastleType.wK] : isCastleAble[CastleType.bK] = false;
+          lastPlayer == Player.w ? isCastleAble[CastleType.wQ] : isCastleAble[CastleType.bQ] = false;
+        }
+        else if(startPiece.pieceType == PieceType.R){
+          if(posStart[1] == (lastPlayer == Player.w ? boardSize[1] - 1 : 0)){
+            if(posStart[0] == 0){
+              lastPlayer == Player.w ? isCastleAble[CastleType.wQ] : isCastleAble[CastleType.bQ] = false;
+            }
+            else if(posStart[0] == 7){
+              lastPlayer == Player.w ? isCastleAble[CastleType.wK] : isCastleAble[CastleType.bK] = false;
+            }
+          }
+        }
       }
+
+      //무승부 클락 처리
       if(startPiece.pieceType == PieceType.P || move == MoveType.c){
-        boardHistory = [];
+        previewBoards.clearBoardState();
         drawClock = 0;
       }
       else if(lastPlayer == Player.b){
-        boardHistory.add(boardState);
+        previewBoards.insertBoardState(boardState);
         drawClock++;
       }
 
@@ -552,7 +633,7 @@ class ChessBoard {
       boardState[posStart[1]][posStart[0]] = Pieces.nX;
 
       epFile = -1;
-      boardHistory = [];
+      previewBoards.clearBoardState();
       drawClock = 0;
       if(turnPass() != 0){
         return 3; // 잘못된 플레이어 턴
@@ -571,11 +652,11 @@ class ChessBoard {
       boardState[boardSize[1] - 1][6] = Pieces.wK;
     }
     else if(castle == CastleType.wQ){
-      Pieces rookiePiece = boardState[0][0];
+      Pieces rookiePiece = boardState[boardSize[1] - 1][0];
       boardState[boardSize[1] - 1][4] = Pieces.nX;
       boardState[boardSize[1] - 1][0] = Pieces.nX;
       boardState[boardSize[1] - 1][3] = rookiePiece;
-      boardState[boardSize[1] - 1][2] = Pieces.bK;
+      boardState[boardSize[1] - 1][2] = Pieces.wK;
     }
     else if(castle == CastleType.bK){
       Pieces rookiePiece = boardState[0][7];
@@ -596,7 +677,7 @@ class ChessBoard {
     }
 
     epFile = -1;
-    boardHistory = [];
+    previewBoards.clearBoardState();
     drawClock = 0;
     if(turnPass() != 0){
       return 3; // 잘못된 플레이어 턴
