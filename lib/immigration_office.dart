@@ -13,7 +13,10 @@ class BoardCommunication {
     List<int> intDeparture = Translate.frontPosition_to_backPosition(departure);
     List<int> intDestination = Translate.frontPosition_to_backPosition(destination);
 
-    backBoard.turnMove(intDeparture, intDestination);
+    Player? winPlayer = backBoard.turnMove(intDeparture, intDestination);
+    if (winPlayer != null) {
+      gameOver(Translate.backPlayer_to_frontPlayer(winPlayer));
+    }
   }
 
   void syncBoard(MoveType moveType) {
@@ -31,7 +34,7 @@ class BoardCommunication {
     syncTurnPlayer(Translate.backPlayer_to_frontPlayer(communicator.backBoard.lastPlayer));
   }
 
-  PieceType getPromotePiece() {
+  PieceType getPromotePiece() { //TODO
     return Translate.frontPieceType_to_backPiecetype(promotePiece);
   }
 }
@@ -105,8 +108,10 @@ class Translate {
   static Color backPlayer_to_frontPlayer(Player player) {
     if (player == Player.w) {
       return Colors.white;
-    } else {
+    } else if (player == Player.b) {
       return Colors.black;
+    } else {
+      return Colors.grey;
     }
   }
 

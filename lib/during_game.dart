@@ -383,6 +383,10 @@ class RightTurnPlayerDisplayPainter extends CustomPainter {
   }
 }
 
+void gameOver(Color player) {
+  print(player); //TODO
+}
+
 const greenWhite = Color(0xFFAAFFAA);
 const greenBlack = Color(0xFF005500);
 
