@@ -24,6 +24,7 @@ late dynamic setState;
 class _DuringGameState extends State<DuringGame> {
   @override
   void initState() {
+    super.initState();
     setState = this.setState;
     board.init();
     _backBoard.initBoard();
@@ -36,15 +37,22 @@ class _DuringGameState extends State<DuringGame> {
 
     TurnPlayerDisplay turnPlayerDisplay = TurnPlayerDisplay();
 
-    List<Widget> userInterfaces = [turnPlayerDisplay.build(context), SizedBox(height: size.height - turnPlayerDisplay.size.height, child: board.build(context))];
+    List<Widget> userInterfaces = [
+      SizedBox(height: size.height*0.1),
+      turnPlayerDisplay.build(context),
+      SizedBox(height: size.height - size.height*0.1 - turnPlayerDisplay.size.height, child: board.build(context))];
 
     return MaterialApp(
       home: PopScope(
         canPop: false,
         onPopInvoked: (value) {},
         child: Scaffold(
-          body: Column(
-            children: userInterfaces,
+          body: Stack(
+            children: [
+              Column(
+                children: userInterfaces,
+              ),
+            ],
           ),
         ),
       ),
@@ -195,9 +203,9 @@ class Piece {
             board.getCell(selectedPiece!.position).isSelected = false;
           });
 
-          communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, this.position);
+          communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, position);
           selectedPiece = null;
-        } else if (turnPlayer == this.color) {
+        } else if (turnPlayer == color) {
           setState(() {
             selectedPiece = this;
             board.getCell(position).isSelected = true;
@@ -266,7 +274,7 @@ class Cell {
             if (selectedPiece != null) {
               board.getCell(selectedPiece!.position).isSelected = false;
 
-              communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, this.position);
+              communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, position);
               selectedPiece = null;
             }
           });
@@ -297,6 +305,7 @@ class TurnPlayerDisplay {
       child: SizedBox(
         height: height,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildLeftTurnPlayerDisplay(context),
             _buildRightTurnPlayerDisplay(context),
@@ -307,12 +316,12 @@ class TurnPlayerDisplay {
   }
 
   Widget _buildLeftTurnPlayerDisplay(BuildContext context) {
-    LeftTurnPlayerDisplayPainter leftTurnPlayerDisplayPainter = LeftTurnPlayerDisplayPainter();
+    LeftTurnPlayerDisplayPainter leftTurnPlayerDisplayPainter = const LeftTurnPlayerDisplayPainter();
     return CustomPaint(painter: leftTurnPlayerDisplayPainter, size: size / 2);
   }
 
   Widget _buildRightTurnPlayerDisplay(BuildContext context) {
-    RightTurnPlayerDisplayPainter rightTurnPlayerDisplayPainter = RightTurnPlayerDisplayPainter();
+    RightTurnPlayerDisplayPainter rightTurnPlayerDisplayPainter = const RightTurnPlayerDisplayPainter();
     return CustomPaint(painter: rightTurnPlayerDisplayPainter, size: size / 2);
   }
 }
@@ -377,7 +386,7 @@ class RightTurnPlayerDisplayPainter extends CustomPainter {
   }
 }
 
-const greenWhite = Color(0xFFDDFFDD);
+const greenWhite = Color(0xFFAAFFAA);
 const greenBlack = Color(0xFF004400);
 
 Color addGreen(Color color) {
