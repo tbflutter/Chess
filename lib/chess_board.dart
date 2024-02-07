@@ -225,8 +225,14 @@ class ChessBoard {
   // 주의사항: 턴이 끝난 후 다음 이동 전에 호출해야 함
   Player? gameEndChecker() {
     // 체크메이트, 스테일메이트
-    if(isCheckMate(boardState, lastPlayer)) return lastPlayer == Player.w ? Player.b : Player.w;
-    if(isStaleMate(boardState, lastPlayer)) return Player.n;
+    if(isCheckMate(boardState, lastPlayer)) {
+      print("1");
+      return lastPlayer == Player.w ? Player.b : Player.w;
+    }
+    if(isStaleMate(boardState, lastPlayer)) {
+      print("2");
+      return Player.n;
+    }
     // 50수 무승부, 기물 부족 무승부, 3수 동형 무승부
     if(drawClock >= 50) return Player.n;
     if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) return Player.n;
@@ -653,6 +659,7 @@ class ChessBoard {
       boardState[boardSize[1] - 1][7] = Pieces.nX;
       boardState[boardSize[1] - 1][5] = rookiePiece;
       boardState[boardSize[1] - 1][6] = Pieces.wK;
+      isCastleAble[CastleType.wK] = false;
     }
     else if(castle == CastleType.wQ){
       Pieces rookiePiece = boardState[boardSize[1] - 1][0];
@@ -660,6 +667,7 @@ class ChessBoard {
       boardState[boardSize[1] - 1][0] = Pieces.nX;
       boardState[boardSize[1] - 1][3] = rookiePiece;
       boardState[boardSize[1] - 1][2] = Pieces.wK;
+      isCastleAble[CastleType.wQ] = false;
     }
     else if(castle == CastleType.bK){
       Pieces rookiePiece = boardState[0][7];
@@ -667,6 +675,7 @@ class ChessBoard {
       boardState[0][7] = Pieces.nX;
       boardState[0][5] = rookiePiece;
       boardState[0][6] = Pieces.bK;
+      isCastleAble[CastleType.bK] = false;
     }
     else if(castle == CastleType.bQ){
       Pieces rookiePiece = boardState[0][0];
@@ -674,6 +683,7 @@ class ChessBoard {
       boardState[0][0] = Pieces.nX;
       boardState[0][3] = rookiePiece;
       boardState[0][2] = Pieces.bK;
+      isCastleAble[CastleType.bQ] = false;
     }
     else{
       return 2; // 올바르지 않은 캐슬링 종류
