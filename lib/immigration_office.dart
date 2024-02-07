@@ -12,18 +12,10 @@ class BoardCommunication {
     List<int> intDeparture = Translate.frontPosition_to_backPosition(departure);
     List<int> intDestination = Translate.frontPosition_to_backPosition(destination);
 
-    print(departure.alphanumeric);
-    print(intDeparture);
-    print(backBoard.boardState[intDeparture[1]][intDeparture[0]]);
-    print(destination.alphanumeric);
-    print(intDestination);
-    print(backBoard.boardState[intDestination[1]][intDestination[0]]);
     backBoard.turnMove(intDeparture, intDestination);
-    print("");
   }
 
   void syncBoard(MoveType moveType) {
-    print(moveType);
     List<List<Piece?>> transcribedBoard = List.generate(ChessBoard.boardSize[1], (i) =>
         List.generate(ChessBoard.boardSize[0], (j) => Translate.backPiece_to_frontPiece(backBoard.boardState[i][j])));
 
