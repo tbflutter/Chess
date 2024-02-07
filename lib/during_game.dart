@@ -390,7 +390,7 @@ class RightTurnPlayerDisplayPainter extends CustomPainter {
 }
 
 const greenWhite = Color(0xFFAAFFAA);
-const greenBlack = Color(0xFF004400);
+const greenBlack = Color(0xFF005500);
 
 Color addGreen(Color color) {
   if (color == Colors.white) {
