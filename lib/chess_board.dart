@@ -859,15 +859,15 @@ class ChessBoard {
       } else {}
     } //나이트 확인 종료
     //----4.폰에 의한 체크 위협 상황 여부 판별----
-    if (pos[0] - 1 > -1 && -1 < pos[1] - fw() && pos[1] - fw() < boardSize[1]) {
-      if (boardState[pos[1] - fw()][pos[0] - 1].pieceType == PieceType.P
-          && boardState[pos[1] - fw()][pos[0] - 1].controller != KingPlayer) {
+    if (pos[0] - 1 > -1 && -1 < pos[1] + fw() && pos[1] + fw() < boardSize[1]) {
+      if (boardState[pos[1] + fw()][pos[0] - 1].pieceType == PieceType.P
+          && boardState[pos[1] + fw()][pos[0] - 1].controller != KingPlayer) {
         return true;
       } else {}
     }
-    if(pos[0] + 1 < boardSize[0] && -1 < pos[1] - fw() && pos[1] - fw() < boardSize[1]) {
-      if (boardState[pos[1] - fw()][pos[0] + 1].pieceType == PieceType.P
-          && boardState[pos[1] - fw()][pos[0] + 1].controller != KingPlayer) {
+    if(pos[0] + 1 < boardSize[0] && -1 < pos[1] + fw() && pos[1] + fw() < boardSize[1]) {
+      if (boardState[pos[1] + fw()][pos[0] + 1].pieceType == PieceType.P
+          && boardState[pos[1] + fw()][pos[0] + 1].controller != KingPlayer) {
         return true;
       } else {}
     }//폰 확인 종료
