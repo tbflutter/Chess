@@ -42,6 +42,7 @@ class PreviewBoards{
   }
 
   // BoardState를 previewBoards에 정렬을 유지하며 삽입
+  //TODO : 턴도 저장하게 하기
   void insertBoardState(List<List<Pieces>> boardState){
     boardSearchLoop:
     for (int k = 0; k <= previewBoards.length; k++){
@@ -50,24 +51,32 @@ class PreviewBoards{
         previewBoardsMultiplier.add(1);
         break boardSearchLoop;
       }
+      print("ㅁ");
       for (int j = 0; j < ChessBoard.boardSize[1]; j++) {
         for (int i = 0; i < ChessBoard.boardSize[0]; i++) {
+          print("ㅅ");
+          print(boardState[j][i].index);
+          print(previewBoards[k][j][i].index);
           if(boardState[j][i].index > previewBoards[k][j][i].index){
             continue boardSearchLoop;
           }
           else if(boardState[j][i].index < previewBoards[k][j][i].index){
             previewBoards.insert(k, boardState);
             previewBoardsMultiplier.insert(k, 1);
+            print("ㅂ");
             break boardSearchLoop;
           }
         }
       }
       previewBoardsMultiplier[k]++;
+      break boardSearchLoop;
     }
+    print("멀");
+    print(previewBoardsMultiplier);
   }
 
   bool isThereThreefoldRepetition()
-  => previewBoardsMultiplier.firstWhere((element) => element >= 3, orElse: () => -1) == -1;
+  => previewBoardsMultiplier.firstWhere((element) => element >= 3, orElse: () => -1) != -1;
 }
 
 // 체스보드 클래스
@@ -480,7 +489,6 @@ class ChessBoard {
             tempMove[pos[1] + 1][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1] + 1]);
           }
 
-          print(isCastleAble);
           if(isCastleAble[lastPlayer == Player.w ? CastleType.wK : CastleType.bK] ?? false){ // 킹사이드 캐슬링
             if(boardState[pos[1]][pos[0] + 1].pieceType == PieceType.X
                 && boardState[pos[1]][pos[0] + 2].pieceType == PieceType.X){
@@ -641,7 +649,7 @@ class ChessBoard {
         drawClock = 0;
       }
       else if(lastPlayer == Player.b){
-        previewBoards.insertBoardState(boardState);
+        previewBoards.insertBoardState(boardCopy());
         drawClock++;
       }
 
