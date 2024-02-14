@@ -5,17 +5,17 @@ import 'chess_board.dart';
 class BoardCommunication {
   late Board frontBoard;
   late ChessBoard backBoard;
-  Type promotePiece = Queen;
+  late Piece? promotePiece;
 
   BoardCommunication.init(this.frontBoard, this.backBoard);
 
-  void sendMovingRequest(Piece piece, Position departure, Position destination) {
+  void sendMovingRequest(Piece piece, Position departure, Position destination, BuildContext context) {
     List<int> intDeparture = Translate.frontPosition_to_backPosition(departure);
     List<int> intDestination = Translate.frontPosition_to_backPosition(destination);
 
-    Player? winPlayer = backBoard.turnMove(intDeparture, intDestination);
+    Player? winPlayer = backBoard.turnMove(intDeparture, intDestination, context);
     if (winPlayer != null) {
-      gameOver(Translate.backPlayer_to_frontPlayer(winPlayer));
+      gameOver(context, Translate.backPlayer_to_frontPlayer(winPlayer));
     }
   }
 
@@ -34,8 +34,13 @@ class BoardCommunication {
     syncTurnPlayer(Translate.backPlayer_to_frontPlayer(communicator.backBoard.lastPlayer));
   }
 
-  PieceType getPromotePiece() { //TODO
-    return Translate.frontPieceType_to_backPiecetype(promotePiece);
+  Pieces getPromotePiece(BuildContext context) {
+    askPromotePiece(context);
+    return Translate.frontPiece_to_backPiece(promotePiece); //TODO
+  }
+
+  void answerPromotePiece(Piece promotePiece) {
+    this.promotePiece = promotePiece;
   }
 }
 
@@ -112,20 +117,6 @@ class Translate {
       return Colors.black;
     } else {
       return Colors.grey;
-    }
-  }
-
-  static PieceType frontPieceType_to_backPiecetype(Type pieceType) {
-    if (pieceType == Queen) {
-      return PieceType.Q;
-    } else if (pieceType == Rook) {
-      return PieceType.R;
-    } else if (pieceType == Knight) {
-      return PieceType.N;
-    } else if (pieceType == Bishop) {
-      return PieceType.B;
-    } else {
-      throw "Unexpected piece type";
     }
   }
 }

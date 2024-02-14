@@ -14,6 +14,7 @@ Piece? selectedPiece;
 Color turnPlayer = Colors.white;
 ChessBoard _backBoard = ChessBoard();
 BoardCommunication communicator = BoardCommunication.init(board, _backBoard);
+bool isGameOver = false;
 
 void syncTurnPlayer(Color player) {
   turnPlayer = player;
@@ -26,6 +27,7 @@ class _DuringGameState extends State<DuringGame> {
   void initState() {
     super.initState();
     setState = this.setState;
+    isGameOver = false;
     board.init();
     _backBoard.initBoard();
     communicator.syncBoard(MoveType.x);
@@ -48,9 +50,6 @@ class _DuringGameState extends State<DuringGame> {
         onPopInvoked: (value) {},
         child: Scaffold(
           body: Column(children: userInterfaces),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.ice_skating),
-            onPressed: () {promotionDialogBuilder(context);},),
         ),
       ),
     );
@@ -192,36 +191,11 @@ class Piece {
   late Position position;
   late Color color;
 
-  Widget setBody(Widget child) {
-    body = GestureDetector(
-      onTap: () {
-        if (selectedPiece != null) {
-          setState(() {
-            board.getCell(selectedPiece!.position).isSelected = false;
-          });
-
-          communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, position);
-          selectedPiece = null;
-        } else if (turnPlayer == color) {
-          setState(() {
-            selectedPiece = this;
-            board.getCell(position).isSelected = true;
-          });
-        }
-      },
-      child: child,
-    );
-
-    return body;
-  }
-
   Piece(this.color, String lowerImageDirectory) {
     String upperImageDirectory = color == Colors.white ? "assets/pieces/white/" : "assets/pieces/black/";
     AssetImage targetImage = AssetImage("$upperImageDirectory$lowerImageDirectory");
 
-    setBody(
-      Image(image: targetImage),
-    );
+    body = Image(image: targetImage);
   }
 }
 
@@ -268,11 +242,23 @@ class Cell {
       child: GestureDetector(
         onTap: () {
           setState(() {
-            if (selectedPiece != null) {
-              board.getCell(selectedPiece!.position).isSelected = false;
+            if (isGameOver == false) {
+              if (selectedPiece != null) {
+                board
+                    .getCell(selectedPiece!.position)
+                    .isSelected = false;
 
-              communicator.sendMovingRequest(selectedPiece!, selectedPiece!.position, position);
-              selectedPiece = null;
+                communicator.sendMovingRequest(
+                    selectedPiece!, selectedPiece!.position, position, context);
+                selectedPiece = null;
+              } else if (turnPlayer == piece?.color) {
+                setState(() {
+                  selectedPiece = piece;
+                  board
+                      .getCell(position)
+                      .isSelected = true;
+                });
+              }
             }
           });
         },
@@ -383,8 +369,13 @@ class RightTurnPlayerDisplayPainter extends CustomPainter {
   }
 }
 
-void gameOver(Color player) {
-  print(player); //TODO
+void gameOver(BuildContext context, Color player,) {
+  isGameOver = true;
+  gameOverDialogBuilder(context, player);
+}
+
+void askPromotePiece(BuildContext context) {
+  promotionDialogBuilder(context);
 }
 
 const greenWhite = Color(0xFFAAFFAA);
@@ -399,15 +390,29 @@ Color addGreen(Color color) {
 }
 
 // https://api.flutter.dev/flutter/material/showDialog.html
-Future<void> winDialogBuilder(BuildContext context) {
+Future<void> gameOverDialogBuilder(BuildContext context, Color winPlayer) {
+  Text winPlayerText;
+  if (winPlayer == Colors.white) {
+    winPlayerText = const Text('White Wins!');
+  } else if (winPlayer == Colors.black) {
+    winPlayerText = const Text('Black Wins!');
+  } else {
+    winPlayerText = const Text('Draw');
+  }
+
+  Text detailedText;
+  if (winPlayer == Colors.white || winPlayer == Colors.black) {
+    detailedText = const Text('Win by Checkmate');
+  } else {
+    detailedText = const Text('');
+  }
+
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('White Wins!'),
-        content: const Text(
-          'Win by Checkmate',
-        ),
+        title: winPlayerText,
+        content: detailedText,
         actions: <Widget>[
           TextButton(
             style: TextButton.styleFrom(
@@ -437,7 +442,7 @@ Future<void> promotionDialogBuilder(BuildContext context) {
             ),
             child: const Text("Queen"),
             onPressed: () {
-              communicator.promotePiece = Queen;
+              communicator.answerPromotePiece(Queen(turnPlayer));
             },
           ),
           TextButton(
@@ -446,7 +451,7 @@ Future<void> promotionDialogBuilder(BuildContext context) {
             ),
             child: const Text("Rook"),
             onPressed: () {
-              communicator.promotePiece = Rook;
+              communicator.answerPromotePiece(Rook(turnPlayer));
             },
           ),
           TextButton(
@@ -455,7 +460,7 @@ Future<void> promotionDialogBuilder(BuildContext context) {
             ),
             child: const Text("Knight"),
             onPressed: () {
-              communicator.promotePiece = Knight;
+              communicator.answerPromotePiece(Knight(turnPlayer));
             },
           ),
           TextButton(
@@ -464,7 +469,7 @@ Future<void> promotionDialogBuilder(BuildContext context) {
             ),
             child: const Text("Bishop"),
             onPressed: () {
-              communicator.promotePiece = Bishop;
+              communicator.answerPromotePiece(Bishop(turnPlayer));
             },
           ),
         ],

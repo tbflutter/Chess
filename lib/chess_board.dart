@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'during_game.dart';
 
 enum Pieces { // 기물 목록
@@ -226,17 +228,16 @@ class ChessBoard {
   Player? gameEndChecker() {
     // 체크메이트, 스테일메이트
     if(isCheckMate(boardState, lastPlayer)) {
-      print("1");
       return lastPlayer == Player.w ? Player.b : Player.w;
     }
     if(isStaleMate(boardState, lastPlayer)) {
-      print("2");
       return Player.n;
     }
     // 50수 무승부, 기물 부족 무승부, 3수 동형 무승부
     if(drawClock >= 50) return Player.n;
     if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) return Player.n;
-    if(previewBoards.isThereThreefoldRepetition()) return Player.n;
+    //if(previewBoards.isThereThreefoldRepetition()) return Player.n; //TODO
+    if(previewBoards.isThereThreefoldRepetition()) return null; //TODO
     // 게임이 안 끝남
     return null;
   }
@@ -520,7 +521,7 @@ class ChessBoard {
   // 프로모션 시에는 외부의 getPromotePiece()함수를 호출 후 처리 (변경가능)
   // 보드 밖을 참조하거나 불가능한 이동 시에는 이동 처리 없이 이동코드 x로 syncBoard()함수에 전달
   // 이동이 이루어지지 않았다면 null을, 이동이 이루어졌다면 gameEndChecker()를 리턴
-  Player? turnMove(List<int> posStart, List<int> posEnd) {
+  Player? turnMove(List<int> posStart, List<int> posEnd, BuildContext context) {
     if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
       communicator.syncBoard(MoveType.x); // 보드 외부에 이동 시도
       return null;
@@ -552,7 +553,7 @@ class ChessBoard {
       return gameEndChecker();
     }
     else if(move == MoveType.pm || move == MoveType.cpm){
-      Pieces promotePiece = Pieces.getPiece(lastPlayer, communicator.getPromotePiece());
+      Pieces promotePiece = communicator.getPromotePiece(context);
       movePromote(promotePiece, posStart, posEnd);
       communicator.syncBoard(move);
       return gameEndChecker();
