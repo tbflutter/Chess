@@ -56,9 +56,6 @@ class PreviewBoards{
       print("ㅁ");
       for (int j = 0; j < ChessBoard.boardSize[1]; j++) {
         for (int i = 0; i < ChessBoard.boardSize[0]; i++) {
-          print("ㅅ");
-          print(boardState[j][i].index);
-          print(previewBoards[k][j][i].index);
           if(boardState[j][i].index > previewBoards[k][j][i].index){
             continue boardSearchLoop;
           }
@@ -120,6 +117,28 @@ class ChessBoard {
     lastPlayer = Player.w; // 흰색 먼저 시작
   }
 
+  /*
+  void initBoard() { //보드 초기화
+    boardState = [
+      [Pieces.nX, Pieces.bN, Pieces.bB, Pieces.nX, Pieces.bK, Pieces.nX, Pieces.nX, Pieces.nX,],
+      List.generate(boardSize[0], (index) => Pieces.nX),
+      List.generate(boardSize[0], (index) => Pieces.nX),
+      List.generate(boardSize[0], (index) => Pieces.nX),
+      List.generate(boardSize[0], (index) => Pieces.nX),
+      List.generate(boardSize[0], (index) => Pieces.nX),
+      List.generate(boardSize[0], (index) => Pieces.nX),
+      [Pieces.nX, Pieces.wN, Pieces.wB, Pieces.nX, Pieces.wK, Pieces.nX, Pieces.nX, Pieces.nX,],
+    ]; // 초기 보드 상태
+    isCastleAble = {
+      CastleType.wK : true,
+      CastleType.wQ : true,
+      CastleType.bK : true,
+      CastleType.bQ : true,
+    }; // 모든 캐슬링(백킹, 백퀸, 흑킹, 흑퀸) 가능으로 설정
+    lastPlayer = Player.w; // 흰색 먼저 시작
+  }
+   */
+
   Map<Pieces, int> getPieceCount() { // 보드의 기물 수를 각각 세어주는 함수
     List<String> pieceList = Pieces.values.map((e) => e.name).toList();
     Map<Pieces,int> pieceCount = {};
@@ -174,6 +193,7 @@ class ChessBoard {
           for (String opp in playerList) { // opp: 상대 플레이어
             Player opponent = Player.values.byName(opp);
             if(player == opponent) continue;
+            if(opponent == Player.n) continue;
             //킹 + 나이트 vs 킹 + 룩/비숍/나이트/폰 -> 충분
             if(pieceCount[Pieces.getPiece(opponent, PieceType.P)]! > 0) {
               isInsufficientPiece[player] = false;
@@ -214,6 +234,8 @@ class ChessBoard {
           for (String opp in playerList) { // opp: 상대 플레이어
             Player opponent = Player.values.byName(opp);
             if(player == opponent) continue;
+            if(opponent == Player.n) continue;
+            print(opponent);
             //킹 + 비숍 vs 킹 + 나이트/폰 -> 충분
             if(pieceCount[Pieces.getPiece(opponent, PieceType.P)]! > 0) {
               isInsufficientPiece[player] = false;
