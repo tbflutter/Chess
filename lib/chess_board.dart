@@ -226,17 +226,24 @@ class ChessBoard {
   Player? gameEndChecker() {
     // 체크메이트, 스테일메이트
     if(isCheckMate(boardState, lastPlayer)) {
-      print("1");
       return lastPlayer == Player.w ? Player.b : Player.w;
     }
     if(isStaleMate(boardState, lastPlayer)) {
-      print("2");
       return Player.n;
     }
     // 50수 무승부, 기물 부족 무승부, 3수 동형 무승부
-    if(drawClock >= 50) return Player.n;
-    if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) return Player.n;
-    if(previewBoards.isThereThreefoldRepetition()) return Player.n;
+    if(drawClock >= 50) {
+      print("1");
+      return Player.n;
+    }
+    if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) {
+      print("2");
+      return Player.n;
+    }
+    if(previewBoards.isThereThreefoldRepetition()) {
+      print("3");
+      return Player.n;
+    }
     // 게임이 안 끝남
     return null;
   }
@@ -473,6 +480,7 @@ class ChessBoard {
             tempMove[pos[1] + 1][pos[0] + 1] = findMoveType(pos, [pos[0] + 1, pos[1] + 1]);
           }
 
+          print(isCastleAble);
           if(isCastleAble[lastPlayer == Player.w ? CastleType.wK : CastleType.bK] ?? false){ // 킹사이드 캐슬링
             if(boardState[pos[1]][pos[0] + 1].pieceType == PieceType.X
                 && boardState[pos[1]][pos[0] + 2].pieceType == PieceType.X){
@@ -521,6 +529,7 @@ class ChessBoard {
   // 보드 밖을 참조하거나 불가능한 이동 시에는 이동 처리 없이 이동코드 x로 syncBoard()함수에 전달
   // 이동이 이루어지지 않았다면 null을, 이동이 이루어졌다면 gameEndChecker()를 리턴
   Player? turnMove(List<int> posStart, List<int> posEnd) {
+    print(gameEndChecker());
     if(posStart[0] <= -1 || posStart[0] >= boardSize[0] || posStart[1] <= -1 || posStart[1] >= boardSize[1]){
       communicator.syncBoard(MoveType.x); // 보드 외부에 이동 시도
       return null;
@@ -595,16 +604,32 @@ class ChessBoard {
           boardState[posEnd[1] - fw()][posEnd[0]] = Pieces.nX;
         }
         else if(startPiece.pieceType == PieceType.K){
-          lastPlayer == Player.w ? isCastleAble[CastleType.wK] : isCastleAble[CastleType.bK] = false;
-          lastPlayer == Player.w ? isCastleAble[CastleType.wQ] : isCastleAble[CastleType.bQ] = false;
+          if(lastPlayer == Player.w){
+            isCastleAble[CastleType.wK] = false;
+            isCastleAble[CastleType.wQ] = false;
+          }
+          else if(lastPlayer == Player.b){
+            isCastleAble[CastleType.bK] = false;
+            isCastleAble[CastleType.bQ] = false;
+          }
         }
         else if(startPiece.pieceType == PieceType.R){
           if(posStart[1] == (lastPlayer == Player.w ? boardSize[1] - 1 : 0)){
             if(posStart[0] == 0){
-              lastPlayer == Player.w ? isCastleAble[CastleType.wQ] : isCastleAble[CastleType.bQ] = false;
+              if(lastPlayer == Player.w){
+                isCastleAble[CastleType.wQ] = false;
+              }
+              else if(lastPlayer == Player.b){
+                isCastleAble[CastleType.bQ] = false;
+              }
             }
             else if(posStart[0] == 7){
-              lastPlayer == Player.w ? isCastleAble[CastleType.wK] : isCastleAble[CastleType.bK] = false;
+              if(lastPlayer == Player.w){
+                isCastleAble[CastleType.wK] = false;
+              }
+              else if(lastPlayer == Player.b){
+                isCastleAble[CastleType.bK] = false;
+              }
             }
           }
         }
@@ -658,6 +683,7 @@ class ChessBoard {
       boardState[boardSize[1] - 1][5] = rookiePiece;
       boardState[boardSize[1] - 1][6] = Pieces.wK;
       isCastleAble[CastleType.wK] = false;
+      isCastleAble[CastleType.wQ] = false;
     }
     else if(castle == CastleType.wQ){
       Pieces rookiePiece = boardState[boardSize[1] - 1][0];
@@ -665,6 +691,7 @@ class ChessBoard {
       boardState[boardSize[1] - 1][0] = Pieces.nX;
       boardState[boardSize[1] - 1][3] = rookiePiece;
       boardState[boardSize[1] - 1][2] = Pieces.wK;
+      isCastleAble[CastleType.wK] = false;
       isCastleAble[CastleType.wQ] = false;
     }
     else if(castle == CastleType.bK){
@@ -674,6 +701,7 @@ class ChessBoard {
       boardState[0][5] = rookiePiece;
       boardState[0][6] = Pieces.bK;
       isCastleAble[CastleType.bK] = false;
+      isCastleAble[CastleType.bQ] = false;
     }
     else if(castle == CastleType.bQ){
       Pieces rookiePiece = boardState[0][0];
@@ -681,6 +709,7 @@ class ChessBoard {
       boardState[0][0] = Pieces.nX;
       boardState[0][3] = rookiePiece;
       boardState[0][2] = Pieces.bK;
+      isCastleAble[CastleType.bK] = false;
       isCastleAble[CastleType.bQ] = false;
     }
     else{
