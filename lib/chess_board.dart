@@ -44,6 +44,7 @@ class PreviewBoards{
   }
 
   // BoardState를 previewBoards에 정렬을 유지하며 삽입
+  //TODO : 턴도 저장하게 하기
   void insertBoardState(List<List<Pieces>> boardState){
     boardSearchLoop:
     for (int k = 0; k <= previewBoards.length; k++){
@@ -52,24 +53,32 @@ class PreviewBoards{
         previewBoardsMultiplier.add(1);
         break boardSearchLoop;
       }
+      print("ㅁ");
       for (int j = 0; j < ChessBoard.boardSize[1]; j++) {
         for (int i = 0; i < ChessBoard.boardSize[0]; i++) {
+          print("ㅅ");
+          print(boardState[j][i].index);
+          print(previewBoards[k][j][i].index);
           if(boardState[j][i].index > previewBoards[k][j][i].index){
             continue boardSearchLoop;
           }
           else if(boardState[j][i].index < previewBoards[k][j][i].index){
             previewBoards.insert(k, boardState);
             previewBoardsMultiplier.insert(k, 1);
+            print("ㅂ");
             break boardSearchLoop;
           }
         }
       }
       previewBoardsMultiplier[k]++;
+      break boardSearchLoop;
     }
+    print("멀");
+    print(previewBoardsMultiplier);
   }
 
   bool isThereThreefoldRepetition()
-  => previewBoardsMultiplier.firstWhere((element) => element >= 3, orElse: () => -1) == -1;
+  => previewBoardsMultiplier.firstWhere((element) => element >= 3, orElse: () => -1) != -1;
 }
 
 // 체스보드 클래스
@@ -234,10 +243,18 @@ class ChessBoard {
       return Player.n;
     }
     // 50수 무승부, 기물 부족 무승부, 3수 동형 무승부
-    if(drawClock >= 50) return Player.n;
-    if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) return Player.n;
-    //if(previewBoards.isThereThreefoldRepetition()) return Player.n; //TODO
-    if(previewBoards.isThereThreefoldRepetition()) return null; //TODO
+    if(drawClock >= 50) {
+      print("1");
+      return Player.n;
+    }
+    if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) {
+      print("2");
+      return Player.n;
+    }
+    if(previewBoards.isThereThreefoldRepetition()) {
+      print("3");
+      return Player.n;
+    }
     // 게임이 안 끝남
     return null;
   }
@@ -596,16 +613,32 @@ class ChessBoard {
           boardState[posEnd[1] - fw()][posEnd[0]] = Pieces.nX;
         }
         else if(startPiece.pieceType == PieceType.K){
-          lastPlayer == Player.w ? isCastleAble[CastleType.wK] : isCastleAble[CastleType.bK] = false;
-          lastPlayer == Player.w ? isCastleAble[CastleType.wQ] : isCastleAble[CastleType.bQ] = false;
+          if(lastPlayer == Player.w){
+            isCastleAble[CastleType.wK] = false;
+            isCastleAble[CastleType.wQ] = false;
+          }
+          else if(lastPlayer == Player.b){
+            isCastleAble[CastleType.bK] = false;
+            isCastleAble[CastleType.bQ] = false;
+          }
         }
         else if(startPiece.pieceType == PieceType.R){
           if(posStart[1] == (lastPlayer == Player.w ? boardSize[1] - 1 : 0)){
             if(posStart[0] == 0){
-              lastPlayer == Player.w ? isCastleAble[CastleType.wQ] : isCastleAble[CastleType.bQ] = false;
+              if(lastPlayer == Player.w){
+                isCastleAble[CastleType.wQ] = false;
+              }
+              else if(lastPlayer == Player.b){
+                isCastleAble[CastleType.bQ] = false;
+              }
             }
             else if(posStart[0] == 7){
-              lastPlayer == Player.w ? isCastleAble[CastleType.wK] : isCastleAble[CastleType.bK] = false;
+              if(lastPlayer == Player.w){
+                isCastleAble[CastleType.wK] = false;
+              }
+              else if(lastPlayer == Player.b){
+                isCastleAble[CastleType.bK] = false;
+              }
             }
           }
         }
@@ -617,7 +650,7 @@ class ChessBoard {
         drawClock = 0;
       }
       else if(lastPlayer == Player.b){
-        previewBoards.insertBoardState(boardState);
+        previewBoards.insertBoardState(boardCopy());
         drawClock++;
       }
 
@@ -659,6 +692,7 @@ class ChessBoard {
       boardState[boardSize[1] - 1][5] = rookiePiece;
       boardState[boardSize[1] - 1][6] = Pieces.wK;
       isCastleAble[CastleType.wK] = false;
+      isCastleAble[CastleType.wQ] = false;
     }
     else if(castle == CastleType.wQ){
       Pieces rookiePiece = boardState[boardSize[1] - 1][0];
@@ -666,6 +700,7 @@ class ChessBoard {
       boardState[boardSize[1] - 1][0] = Pieces.nX;
       boardState[boardSize[1] - 1][3] = rookiePiece;
       boardState[boardSize[1] - 1][2] = Pieces.wK;
+      isCastleAble[CastleType.wK] = false;
       isCastleAble[CastleType.wQ] = false;
     }
     else if(castle == CastleType.bK){
@@ -675,6 +710,7 @@ class ChessBoard {
       boardState[0][5] = rookiePiece;
       boardState[0][6] = Pieces.bK;
       isCastleAble[CastleType.bK] = false;
+      isCastleAble[CastleType.bQ] = false;
     }
     else if(castle == CastleType.bQ){
       Pieces rookiePiece = boardState[0][0];
@@ -682,6 +718,7 @@ class ChessBoard {
       boardState[0][0] = Pieces.nX;
       boardState[0][3] = rookiePiece;
       boardState[0][2] = Pieces.bK;
+      isCastleAble[CastleType.bK] = false;
       isCastleAble[CastleType.bQ] = false;
     }
     else{
