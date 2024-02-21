@@ -133,6 +133,9 @@ class ChessBoard {
       CastleType.bK : true,
       CastleType.bQ : true,
     }; // 모든 캐슬링(백킹, 백퀸, 흑킹, 흑퀸) 가능으로 설정
+    epFile = -1; // 앙파상 가능한 열 (0~7은 두칸 전진한 폰의 열 인덱스, -1이면 없음)
+    drawClock = 0; // 마지막으로 기물을 잡거나 폰을 전진한 후 지난 턴의 수
+    previewBoards = PreviewBoards();
     lastPlayer = Player.w; // 흰색 먼저 시작
   }
 
