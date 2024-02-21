@@ -53,7 +53,6 @@ class PreviewBoards{
         previewBoardsMultiplier.add(1);
         break boardSearchLoop;
       }
-      print("ㅁ");
       for (int j = 0; j < ChessBoard.boardSize[1]; j++) {
         for (int i = 0; i < ChessBoard.boardSize[0]; i++) {
           if(boardState[j][i].index > previewBoards[k][j][i].index){
@@ -62,7 +61,6 @@ class PreviewBoards{
           else if(boardState[j][i].index < previewBoards[k][j][i].index){
             previewBoards.insert(k, boardState);
             previewBoardsMultiplier.insert(k, 1);
-            print("ㅂ");
             break boardSearchLoop;
           }
         }
@@ -70,8 +68,6 @@ class PreviewBoards{
       previewBoardsMultiplier[k]++;
       break boardSearchLoop;
     }
-    print("멀");
-    print(previewBoardsMultiplier);
   }
 
   bool isThereThreefoldRepetition()
@@ -117,7 +113,7 @@ class ChessBoard {
     lastPlayer = Player.w; // 흰색 먼저 시작
   }
 
-  /*
+  /* 초기 보드 상태를 마음대로 조작하여 개발자 테스트할 때 사용
   void initBoard() { //보드 초기화
     boardState = [
       [Pieces.nX, Pieces.bN, Pieces.bB, Pieces.nX, Pieces.bK, Pieces.nX, Pieces.nX, Pieces.nX,],
@@ -235,7 +231,6 @@ class ChessBoard {
             Player opponent = Player.values.byName(opp);
             if(player == opponent) continue;
             if(opponent == Player.n) continue;
-            print(opponent);
             //킹 + 비숍 vs 킹 + 나이트/폰 -> 충분
             if(pieceCount[Pieces.getPiece(opponent, PieceType.P)]! > 0) {
               isInsufficientPiece[player] = false;
@@ -266,15 +261,12 @@ class ChessBoard {
     }
     // 50수 무승부, 기물 부족 무승부, 3수 동형 무승부
     if(drawClock >= 50) {
-      print("1");
       return Player.n;
     }
     if(isInsufficientPiece()[Player.w] == true && isInsufficientPiece()[Player.b] == true) {
-      print("2");
       return Player.n;
     }
     if(previewBoards.isThereThreefoldRepetition()) {
-      print("3");
       return Player.n;
     }
     // 게임이 안 끝남
