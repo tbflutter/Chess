@@ -14,10 +14,13 @@ class BoardCommunication {
     List<int> intDestination = Translate.frontPosition_to_backPosition(destination);
 
     Player? winPlayer;
-    backBoard.turnMove(intDeparture, intDestination, context).then((value) => winPlayer = value);
-    if (winPlayer != null) {
-      gameOver(context, Translate.backPlayer_to_frontPlayer(winPlayer!));
-    }
+    print("1");
+    backBoard.turnMove(intDeparture, intDestination, context).then((value) {
+      winPlayer = value;
+      if (winPlayer != null) {
+        gameOver(context, Translate.backPlayer_to_frontPlayer(winPlayer!));
+      }
+      });
   }
 
   void syncBoard(MoveType moveType) {
