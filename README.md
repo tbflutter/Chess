@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # chess
+=======
+# test11
+>>>>>>> 26f7ef1e308d89cb43157e78727eaa8a9b893fdc
 
 A new Flutter project.
 
