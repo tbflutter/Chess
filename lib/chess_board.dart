@@ -61,7 +61,6 @@ class PreviewBoards{
   }
 
   // BoardState를 previewBoards에 정렬을 유지하며 삽입
-  //TODO : 턴도 저장하게 하기
   void insertBoardState(List<List<Pieces>> boardState, Player lastPlayer){
     PreviewBoard newPreviewBoard = PreviewBoard(boardState, lastPlayer);
     boardSearchLoop:
@@ -71,13 +70,13 @@ class PreviewBoards{
         break boardSearchLoop;
       }
       else{
-        BigInt BoardOrdinal = previewBoards[k].boardOrdinal();
+        BigInt boardOrdinal = previewBoards[k].boardOrdinal();
         BigInt newBoardOrdinal = newPreviewBoard.boardOrdinal();
-        if(BoardOrdinal > newBoardOrdinal) {
+        if(boardOrdinal > newBoardOrdinal) {
           previewBoards.insert(k, newPreviewBoard);
           break boardSearchLoop;
         }
-        else if(BoardOrdinal < newBoardOrdinal){
+        else if(boardOrdinal < newBoardOrdinal){
           continue;
         }
         else{
@@ -778,7 +777,7 @@ class ChessBoard {
   late int kingposy;
   late int kingposx;
 
-  List<int> KingPos(List<List<Pieces>> boardState) {
+  List<int> kingPos(List<List<Pieces>> boardState) {
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
         if (boardState[i][j].pieceType == PieceType.K
@@ -793,16 +792,16 @@ class ChessBoard {
   }
 
   bool isChecked(List<List<Pieces>> boardState) {// 현재 보드를 주면 체크 여부를 반환하는 함수
-    List<int> pos = KingPos(boardState); //킹의 좌표 중심 생각
-    final KingPlayer = boardState[pos[1]][pos[0]].controller;//판단 대상 킹의 주인을 변수로 불러옴
-    late var CheckCo; //로직에서 체크하는 좌표를 담은 변수로 사용함
+    List<int> pos = kingPos(boardState); //킹의 좌표 중심 생각
+    final kingPlayer = boardState[pos[1]][pos[0]].controller;//판단 대상 킹의 주인을 변수로 불러옴
+    late Pieces checkCo; //로직에서 체크하는 좌표를 담은 변수로 사용함
     //----1. 룩에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < boardSize[1]; i++) {
       if(pos[1] - i < 0) break;
-      CheckCo = boardState[pos[1] - i][pos[0]];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1] - i][pos[0]];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.R && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -810,10 +809,10 @@ class ChessBoard {
     } // 아래로 확인
     for (int i = 1; i < boardSize[1]; i++) {
       if(pos[1] + i >= boardSize[1]) break;
-      CheckCo = boardState[pos[1] + i][pos[0]];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1] + i][pos[0]];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.R && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -821,10 +820,10 @@ class ChessBoard {
     } // 위로 확인
     for (int i = 1; i <= boardSize[0]; i++) {
       if(pos[0] - i < 0) break;
-      CheckCo = boardState[pos[1]][pos[0] - i];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1]][pos[0] - i];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.R && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -832,10 +831,10 @@ class ChessBoard {
     } // 좌로 확인
     for (int i = 1; i < boardSize[0]; i++) {
       if(pos[0] + i >= boardSize[0]) break;
-      CheckCo = boardState[pos[1]][pos[0] + i];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.R && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1]][pos[0] + i];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.R && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -844,10 +843,10 @@ class ChessBoard {
     //----2. 비숍에 의한 체크 위협 상황 여부 판별----
     for (int i = 1; i < 8; i++) {
       if(pos[1] - i < 0 || pos[0] - i < 0) break;
-      CheckCo = boardState[pos[1] - i][pos[0] - i];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1] - i][pos[0] - i];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.B && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -855,10 +854,10 @@ class ChessBoard {
     } // 좌측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
       if(pos[1] + i >= boardSize[1] || pos[0] - i < 0) break;
-      CheckCo = boardState[pos[1] + i][pos[0] - i];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1] + i][pos[0] - i];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.B && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -866,10 +865,10 @@ class ChessBoard {
     } // 좌측 위 대각선 확인
     for (int i = 1; i < 8; i++) {
       if(pos[1] - i < 0 || pos[0] + i >= boardSize[0]) break;
-      CheckCo = boardState[pos[1] - i][pos[0] + i];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1] - i][pos[0] + i];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.B && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -877,10 +876,10 @@ class ChessBoard {
     } // 우측 아래 대각선 확인
     for (int i = 1; i < 8; i++) {
       if(pos[1] + i >= boardSize[1] || pos[0] + i >= boardSize[0]) break;
-      CheckCo = boardState[pos[1] + i][pos[0] + i];
-      if (CheckCo.pieceType == PieceType.X) {} else
-      if ((CheckCo.pieceType == PieceType.B && CheckCo.controller != KingPlayer)||
-          (CheckCo.pieceType == PieceType.Q && CheckCo.controller != KingPlayer)) {
+      checkCo = boardState[pos[1] + i][pos[0] + i];
+      if (checkCo.pieceType == PieceType.X) {} else
+      if ((checkCo.pieceType == PieceType.B && checkCo.controller != kingPlayer)||
+          (checkCo.pieceType == PieceType.Q && checkCo.controller != kingPlayer)) {
         return true;
       } else {
         break;
@@ -890,69 +889,69 @@ class ChessBoard {
     //나이트는 좌표기준 고정된 8개 자리를 확인
     if (pos[0] - 2 > -1 && pos[1] - 1 > -1) {
       if (boardState[pos[1] - 1][pos[0] - 2].pieceType == PieceType.N
-          && boardState[pos[1] - 1][pos[0] - 2].controller != KingPlayer) {
+          && boardState[pos[1] - 1][pos[0] - 2].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] - 1 > -1 && pos[1] - 2 > -1) {
       if (boardState[pos[1] - 2][pos[0] - 1].pieceType == PieceType.N
-          && boardState[pos[1] - 2][pos[0] - 1].controller != KingPlayer) {
+          && boardState[pos[1] - 2][pos[0] - 1].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] - 2 > -1 && pos[1] + 1 < boardSize[1]) {
       if (boardState[pos[1] + 1][pos[0] - 2].pieceType == PieceType.N
-          && boardState[pos[1] + 1][pos[0] - 2].controller != KingPlayer) {
+          && boardState[pos[1] + 1][pos[0] - 2].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] - 1 > -1 && pos[1] + 2 < boardSize[1]) {
       if (boardState[pos[1] + 2][pos[0] - 1].pieceType == PieceType.N
-          && boardState[pos[1] + 2][pos[0] - 1].controller != KingPlayer) {
+          && boardState[pos[1] + 2][pos[0] - 1].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 2 < boardSize[0] && pos[1] - 1 > -1) {
       if (boardState[pos[1] - 1][pos[0] + 2].pieceType == PieceType.N
-          && boardState[pos[1] - 1][pos[0] + 2].controller != KingPlayer) {
+          && boardState[pos[1] - 1][pos[0] + 2].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 1 < boardSize[0] && pos[1] - 2 > -1) {
       if (boardState[pos[1] - 2][pos[0] + 1].pieceType == PieceType.N
-          && boardState[pos[1] - 2][pos[0] + 1].controller != KingPlayer) {
+          && boardState[pos[1] - 2][pos[0] + 1].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 2 < boardSize[0] && pos[1] + 1 < boardSize[1]) {
       if (boardState[pos[1] + 1][pos[0] + 2].pieceType == PieceType.N
-          && boardState[pos[1] + 1][pos[0] + 2].controller != KingPlayer) {
+          && boardState[pos[1] + 1][pos[0] + 2].controller != kingPlayer) {
         return true;
       } else {}
     }
     if (pos[0] + 1 < boardSize[0] && pos[1] + 2 < boardSize[1]) {
       if (boardState[pos[1] + 2][pos[0] + 1].pieceType == PieceType.N
-          && boardState[pos[1] + 2][pos[0] + 1].controller != KingPlayer) {
+          && boardState[pos[1] + 2][pos[0] + 1].controller != kingPlayer) {
         return true;
       } else {}
     } //나이트 확인 종료
     //----4.폰에 의한 체크 위협 상황 여부 판별----
     if (pos[0] - 1 > -1 && -1 < pos[1] + fw() && pos[1] + fw() < boardSize[1]) {
       if (boardState[pos[1] + fw()][pos[0] - 1].pieceType == PieceType.P
-          && boardState[pos[1] + fw()][pos[0] - 1].controller != KingPlayer) {
+          && boardState[pos[1] + fw()][pos[0] - 1].controller != kingPlayer) {
         return true;
       } else {}
     }
     if(pos[0] + 1 < boardSize[0] && -1 < pos[1] + fw() && pos[1] + fw() < boardSize[1]) {
       if (boardState[pos[1] + fw()][pos[0] + 1].pieceType == PieceType.P
-          && boardState[pos[1] + fw()][pos[0] + 1].controller != KingPlayer) {
+          && boardState[pos[1] + fw()][pos[0] + 1].controller != kingPlayer) {
         return true;
       } else {}
     }//폰 확인 종료
     return false;
   }
 
-  bool isCannotEscape(List<List<Pieces>> boardState, Player Player){//스스로 패배하지 않는 다음 수가 있는지 검사하는 함수
+  bool isCannotEscape(List<List<Pieces>> boardState, Player player){//스스로 패배하지 않는 다음 수가 있는지 검사하는 함수
     for (int x = 0; x < 8; x++) {
       for (int y = 0; y < 8; y++) {
         if (boardState[y][x].controller == lastPlayer){
@@ -981,16 +980,16 @@ class ChessBoard {
     return true; //모든 경우를 돈 후 체크를 벗어나는 경우가 없다면 true
   }
 
-  bool isCheckMate(List<List<Pieces>> boardState, Player Player){//체크메이트 판단 함수
-    if (isChecked(boardState) && isCannotEscape(boardState, Player)){
+  bool isCheckMate(List<List<Pieces>> boardState, Player player){//체크메이트 판단 함수
+    if (isChecked(boardState) && isCannotEscape(boardState, player)){
       return true;
     } else {
       return false;
     }
   }
 
-  bool isStaleMate(List<List<Pieces>> boardState, Player Player){//스테일메이트 판단 함수
-    if (!isChecked(boardState) && isCannotEscape(boardState, Player)){
+  bool isStaleMate(List<List<Pieces>> boardState, Player player){//스테일메이트 판단 함수
+    if (!isChecked(boardState) && isCannotEscape(boardState, player)){
       return true;
     } else {
       return false;
