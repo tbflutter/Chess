@@ -13,9 +13,10 @@ class BoardCommunication {
     List<int> intDeparture = Translate.frontPosition_to_backPosition(departure);
     List<int> intDestination = Translate.frontPosition_to_backPosition(destination);
 
-    Player? winPlayer = backBoard.turnMove(intDeparture, intDestination, context);
+    Player? winPlayer;
+    backBoard.turnMove(intDeparture, intDestination, context).then((value) => winPlayer = value);
     if (winPlayer != null) {
-      gameOver(context, Translate.backPlayer_to_frontPlayer(winPlayer));
+      gameOver(context, Translate.backPlayer_to_frontPlayer(winPlayer!));
     }
   }
 
@@ -34,13 +35,8 @@ class BoardCommunication {
     syncTurnPlayer(Translate.backPlayer_to_frontPlayer(communicator.backBoard.lastPlayer));
   }
 
-  Pieces getPromotePiece(BuildContext context) {
-    askPromotePiece(context);
-    return Translate.frontPiece_to_backPiece(promotePiece); //TODO
-  }
-
-  void answerPromotePiece(Piece promotePiece) {
-    this.promotePiece = promotePiece;
+  Future<Pieces> getPromotePiece(BuildContext context) async {
+    return Translate.frontPiece_to_backPiece((await askPromotePiece(context)));
   }
 }
 

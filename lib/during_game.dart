@@ -374,8 +374,8 @@ void gameOver(BuildContext context, Color player,) {
   gameOverDialogBuilder(context, player);
 }
 
-void askPromotePiece(BuildContext context) {
-  promotionDialogBuilder(context);
+Future<Piece?> askPromotePiece(BuildContext context) async {
+  return await promotionDialogBuilder(context);
 }
 
 const greenWhite = Color(0xFFAAFFAA);
@@ -430,48 +430,54 @@ Future<void> gameOverDialogBuilder(BuildContext context, Color winPlayer) {
 }
 
 // https://api.flutter.dev/flutter/material/showDialog.html
-Future<void> promotionDialogBuilder(BuildContext context) {
-  return showDialog<void>(
+Future<Piece?> promotionDialogBuilder(BuildContext context) async {
+  return await showDialog<Piece?>(
     context: context,
     builder: (BuildContext context) {
+      Queen queen = Queen(turnPlayer);
+      Rook rook = Rook(turnPlayer);
+      Knight knight = Knight(turnPlayer);
+      Bishop bishop = Bishop(turnPlayer);
+
       return AlertDialog(
-        actions: <Widget>[
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).textTheme.labelLarge,
-            ),
-            child: const Text("Queen"),
-            onPressed: () {
-              communicator.answerPromotePiece(Queen(turnPlayer));
-            },
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).textTheme.labelLarge,
-            ),
-            child: const Text("Rook"),
-            onPressed: () {
-              communicator.answerPromotePiece(Rook(turnPlayer));
-            },
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).textTheme.labelLarge,
-            ),
-            child: const Text("Knight"),
-            onPressed: () {
-              communicator.answerPromotePiece(Knight(turnPlayer));
-            },
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: Theme.of(context).textTheme.labelLarge,
-            ),
-            child: const Text("Bishop"),
-            onPressed: () {
-              communicator.answerPromotePiece(Bishop(turnPlayer));
-            },
-          ),
+        actions: <Widget> [
+          Column(
+            children: [
+              Row(
+                children: [
+                  GestureDetector(
+                    child: queen.body,
+                    onTap: () {
+                      Navigator.pop(context, queen);
+                    },
+                  ),
+                  GestureDetector(
+                    child: rook.body,
+                    onTap: () {
+                      Navigator.pop(context, rook);
+                    },
+                  ),
+                ],
+              ),
+
+              Row(
+                children: [
+                  GestureDetector(
+                    child: knight.body,
+                    onTap: () {
+                      Navigator.pop(context, knight);
+                    },
+                  ),
+                  GestureDetector(
+                    child: bishop.body,
+                    onTap: () {
+                      Navigator.pop(context, bishop);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          )
         ],
       );
     },
