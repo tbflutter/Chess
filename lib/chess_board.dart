@@ -34,44 +34,68 @@ enum CellColor { // 보드 칸의 색: 흰색, 검은색
 }
 
 // 과거 보드 상태 저장하는 클래스 (3수 동형 판정에 사용)
+class PreviewBoard{
+  List<List<Pieces>> boardState;
+  int boardMultiplier = 1;
+  Player lastPlayer;
+  PreviewBoard(this.boardState, this.lastPlayer);
+  BigInt boardOrdinal(){
+    BigInt boardID = BigInt.from(0);
+    for(int i = 0; i < 8; i++){
+      for(int j = 0; j < 8; j++){
+        boardID += BigInt.from(boardState[j][i].index);
+        boardID *= BigInt.from(Pieces.values.length);
+      }
+    }
+    boardID += BigInt.from(lastPlayer == Player.w ? 0 : 1);
+    return boardID;
+  }
+}
+
+// 과거 보드 상태 저장하는 클래스 (3수 동형 판정에 사용)
 class PreviewBoards{
-  List<List<List<Pieces>>> previewBoards = [];
-  List<int> previewBoardsMultiplier = [];
+  List<PreviewBoard> previewBoards = [];
 
   void clearBoardState(){ // 저장한 상태 지움
     previewBoards = [];
-    previewBoardsMultiplier = [];
   }
 
   // BoardState를 previewBoards에 정렬을 유지하며 삽입
   //TODO : 턴도 저장하게 하기
-  void insertBoardState(List<List<Pieces>> boardState){
+  void insertBoardState(List<List<Pieces>> boardState, Player lastPlayer){
+    PreviewBoard newPreviewBoard = PreviewBoard(boardState, lastPlayer);
     boardSearchLoop:
     for (int k = 0; k <= previewBoards.length; k++){
       if(previewBoards.length == k){
-        previewBoards.add(boardState);
-        previewBoardsMultiplier.add(1);
+        previewBoards.add(newPreviewBoard);
         break boardSearchLoop;
       }
-      for (int j = 0; j < ChessBoard.boardSize[1]; j++) {
-        for (int i = 0; i < ChessBoard.boardSize[0]; i++) {
-          if(boardState[j][i].index > previewBoards[k][j][i].index){
-            continue boardSearchLoop;
+      else{
+        BigInt BoardOrdinal = previewBoards[k].boardOrdinal();
+        BigInt newBoardOrdinal = newPreviewBoard.boardOrdinal();
+        if(BoardOrdinal > newBoardOrdinal) {
+          previewBoards.insert(k, newPreviewBoard);
+          break boardSearchLoop;
+        }
+        else if(BoardOrdinal < newBoardOrdinal){
+          continue;
+        }
+        else{
+          previewBoards[k].boardMultiplier++;
+          /*
+          for(int i = 0; i < previewBoards.length; i++){
+            print(previewBoards[i].boardMultiplier);
           }
-          else if(boardState[j][i].index < previewBoards[k][j][i].index){
-            previewBoards.insert(k, boardState);
-            previewBoardsMultiplier.insert(k, 1);
-            break boardSearchLoop;
-          }
+          print("ㅁ");
+          */
+          break boardSearchLoop;
         }
       }
-      previewBoardsMultiplier[k]++;
-      break boardSearchLoop;
     }
   }
 
   bool isThereThreefoldRepetition()
-  => previewBoardsMultiplier.firstWhere((element) => element >= 3, orElse: () => -1) != -1;
+  => previewBoards.firstWhere((element) => element.boardMultiplier >= 3, orElse: () => PreviewBoard([], Player.n)).boardMultiplier != 1;
 }
 
 // 체스보드 클래스
@@ -663,9 +687,11 @@ class ChessBoard {
         previewBoards.clearBoardState();
         drawClock = 0;
       }
-      else if(lastPlayer == Player.b){
-        previewBoards.insertBoardState(boardCopy());
-        drawClock++;
+      else{
+        previewBoards.insertBoardState(boardCopy(), lastPlayer);
+        if(lastPlayer == Player.b) {
+          drawClock++;
+        }
       }
 
       if(turnPass() != 0){
