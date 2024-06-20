@@ -951,6 +951,55 @@ class ChessBoard {
         return true;
       } else {}
     }//폰 확인 종료
+    //----5.킹에 의한 체크 위협 상황 여부 판별----
+    if (pos[0] + 1 < boardSize[0]) {
+      if (boardState[pos[1]][pos[0] + 1].pieceType == PieceType.K
+          && boardState[pos[1]][pos[0] + 1].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[0] - 1 > -1) {
+      if (boardState[pos[1]][pos[0] - 1].pieceType == PieceType.K
+          && boardState[pos[1]][pos[0] - 1].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[1] + 1 < boardSize[1]) {
+      if (boardState[pos[1] + 1][pos[0]].pieceType == PieceType.K
+          && boardState[pos[1] + 1][pos[0]].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[1] - 1 > -1) {
+      if (boardState[pos[1] - 1][pos[0]].pieceType == PieceType.K
+          && boardState[pos[1] - 1][pos[0]].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[0] + 1 < boardSize[0] && pos[1] + 1 < boardSize[1]) {
+      if (boardState[pos[1] + 1][pos[0] + 1].pieceType == PieceType.K
+          && boardState[pos[1] + 1][pos[0] + 1].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[0] - 1 > -1 && pos[1] + 1 < boardSize[1]) {
+      if (boardState[pos[1] + 1][pos[0] - 1].pieceType == PieceType.K
+          && boardState[pos[1] + 1][pos[0] - 1].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[0] + 1 < boardSize[0] && pos[1] - 1 > -1) {
+      if (boardState[pos[1] - 1][pos[0] + 1].pieceType == PieceType.K
+          && boardState[pos[1] - 1][pos[0] + 1].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
+    if (pos[0] - 1 > -1 && pos[1] - 1 > -1) {
+      if (boardState[pos[1] - 1][pos[0] - 1].pieceType == PieceType.K
+          && boardState[pos[1] - 1][pos[0] - 1].controller != kingPlayer) {
+        return true;
+      } else {}
+    }
     return false;
   }
 
